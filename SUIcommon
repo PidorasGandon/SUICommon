@@ -1,0 +1,892 @@
+-- 🌊 AquaWave Universal v2.0
+-- Чит с ДЕЙСТВИТЕЛЬНО необычными функциями
+
+local AquaWave = {}
+
+-- Создание GUI
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TopBar = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local CloseBtn = Instance.new("TextButton")
+local MinimizeBtn = Instance.new("TextButton")
+local ScrollFrame = Instance.new("ScrollingFrame")
+local PlayerListFrame = Instance.new("Frame")
+local PlayerScrollFrame = Instance.new("ScrollingFrame")
+
+ScreenGui.Name = "AquaWaveUI"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Основное окно
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 500, 0, 550)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
+
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 30, 50)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 15, 30))
+}
+Gradient.Rotation = 45
+Gradient.Parent = MainFrame
+
+-- Топ бар
+TopBar.Name = "TopBar"
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(30, 100, 200)
+TopBar.BorderSizePixel = 0
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 12)
+TopCorner.Parent = TopBar
+
+local TopGradient = Instance.new("UIGradient")
+TopGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 120, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 80, 200))
+}
+TopGradient.Parent = TopBar
+
+-- Название
+Title.Name = "Title"
+Title.Parent = TopBar
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, -80, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "🌊 AquaWave Universal v2.0"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 16
+
+-- Кнопка минимизации
+MinimizeBtn.Name = "MinimizeBtn"
+MinimizeBtn.Parent = TopBar
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+MinimizeBtn.Position = UDim2.new(1, -70, 0, 5)
+MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+MinimizeBtn.Font = Enum.Font.GothamBold
+MinimizeBtn.Text = "-"
+MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeBtn.TextSize = 20
+
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(0, 8)
+MinCorner.Parent = MinimizeBtn
+
+-- Кнопка закрытия
+CloseBtn.Name = "CloseBtn"
+CloseBtn.Parent = TopBar
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 16
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBtn
+
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+local minimized = false
+MinimizeBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        MainFrame:TweenSize(UDim2.new(0, 500, 0, 40), "Out", "Quad", 0.3, true)
+        MinimizeBtn.Text = "+"
+    else
+        MainFrame:TweenSize(UDim2.new(0, 500, 0, 550), "Out", "Quad", 0.3, true)
+        MinimizeBtn.Text = "-"
+    end
+end)
+
+-- Скролл фрейм
+ScrollFrame.Name = "ScrollFrame"
+ScrollFrame.Parent = MainFrame
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.Position = UDim2.new(0, 10, 0, 50)
+ScrollFrame.Size = UDim2.new(1, -20, 1, -60)
+ScrollFrame.ScrollBarThickness = 6
+ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(40, 120, 255)
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = ScrollFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 8)
+
+-- Переменные
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local selectedPlayer = nil
+local animSpeed = 1
+
+-- Функция создания кнопки
+local function CreateButton(name, callback)
+    local Button = Instance.new("TextButton")
+    Button.Name = name
+    Button.Parent = ScrollFrame
+    Button.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+    Button.Size = UDim2.new(1, 0, 0, 35)
+    Button.Font = Enum.Font.Gotham
+    Button.Text = name
+    Button.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Button.TextSize = 14
+    
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 8)
+    BtnCorner.Parent = Button
+    
+    local BtnGradient = Instance.new("UIGradient")
+    BtnGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 50)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 35))
+    }
+    BtnGradient.Parent = Button
+    
+    Button.MouseEnter:Connect(function()
+        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 120, 255)}):Play()
+    end)
+    
+    Button.MouseLeave:Connect(function()
+        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(25, 25, 40)}):Play()
+    end)
+    
+    Button.MouseButton1Click:Connect(callback)
+    return Button
+end
+
+-- Функция создания слайдера
+local function CreateSlider(name, min, max, default, callback)
+    local SliderFrame = Instance.new("Frame")
+    SliderFrame.Name = name
+    SliderFrame.Parent = ScrollFrame
+    SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+    SliderFrame.Size = UDim2.new(1, 0, 0, 50)
+    
+    local SliderCorner = Instance.new("UICorner")
+    SliderCorner.CornerRadius = UDim.new(0, 8)
+    SliderCorner.Parent = SliderFrame
+    
+    local SliderLabel = Instance.new("TextLabel")
+    SliderLabel.Parent = SliderFrame
+    SliderLabel.BackgroundTransparency = 1
+    SliderLabel.Size = UDim2.new(1, 0, 0, 20)
+    SliderLabel.Font = Enum.Font.Gotham
+    SliderLabel.Text = name .. ": " .. default
+    SliderLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    SliderLabel.TextSize = 14
+    
+    local SliderBar = Instance.new("Frame")
+    SliderBar.Parent = SliderFrame
+    SliderBar.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    SliderBar.Position = UDim2.new(0.1, 0, 0.5, 0)
+    SliderBar.Size = UDim2.new(0.8, 0, 0, 6)
+    
+    local BarCorner = Instance.new("UICorner")
+    BarCorner.CornerRadius = UDim.new(1, 0)
+    BarCorner.Parent = SliderBar
+    
+    local SliderFill = Instance.new("Frame")
+    SliderFill.Parent = SliderBar
+    SliderFill.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
+    SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    
+    local FillCorner = Instance.new("UICorner")
+    FillCorner.CornerRadius = UDim.new(1, 0)
+    FillCorner.Parent = SliderFill
+    
+    local SliderButton = Instance.new("TextButton")
+    SliderButton.Parent = SliderBar
+    SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    SliderButton.Position = UDim2.new((default - min) / (max - min), 0, 0.5, 0)
+    SliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
+    SliderButton.Size = UDim2.new(0, 15, 0, 15)
+    SliderButton.Text = ""
+    
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(1, 0)
+    ButtonCorner.Parent = SliderButton
+    
+    local dragging = false
+    
+    SliderButton.MouseButton1Down:Connect(function()
+        dragging = true
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    RunService.RenderStepped:Connect(function()
+        if dragging then
+            local mouse = Player:GetMouse()
+            local relativeX = math.clamp((mouse.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
+            local value = math.floor(min + (max - min) * relativeX)
+            
+            SliderButton.Position = UDim2.new(relativeX, 0, 0.5, 0)
+            SliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
+            SliderLabel.Text = name .. ": " .. value
+            
+            callback(value)
+        end
+    end)
+end
+
+-- Функция создания окна выбора игрока
+local function CreatePlayerSelector()
+    PlayerListFrame.Name = "PlayerListFrame"
+    PlayerListFrame.Parent = ScreenGui
+    PlayerListFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+    PlayerListFrame.BorderSizePixel = 0
+    PlayerListFrame.Position = UDim2.new(0.7, 0, 0.2, 0)
+    PlayerListFrame.Size = UDim2.new(0, 250, 0, 400)
+    PlayerListFrame.Visible = false
+    
+    local PLCorner = Instance.new("UICorner")
+    PLCorner.CornerRadius = UDim.new(0, 12)
+    PLCorner.Parent = PlayerListFrame
+    
+    local PLTitle = Instance.new("TextLabel")
+    PLTitle.Parent = PlayerListFrame
+    PLTitle.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
+    PLTitle.Size = UDim2.new(1, 0, 0, 35)
+    PLTitle.Font = Enum.Font.GothamBold
+    PLTitle.Text = "👥 Select Player"
+    PLTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PLTitle.TextSize = 16
+    
+    local PLTCorner = Instance.new("UICorner")
+    PLTCorner.CornerRadius = UDim.new(0, 12)
+    PLTCorner.Parent = PLTitle
+    
+    PlayerScrollFrame.Parent = PlayerListFrame
+    PlayerScrollFrame.BackgroundTransparency = 1
+    PlayerScrollFrame.Position = UDim2.new(0, 5, 0, 40)
+    PlayerScrollFrame.Size = UDim2.new(1, -10, 1, -45)
+    PlayerScrollFrame.ScrollBarThickness = 4
+    
+    local PLListLayout = Instance.new("UIListLayout")
+    PLListLayout.Parent = PlayerScrollFrame
+    PLListLayout.Padding = UDim.new(0, 5)
+    
+    local function UpdatePlayerList()
+        for _, child in pairs(PlayerScrollFrame:GetChildren()) do
+            if child:IsA("TextButton") then
+                child:Destroy()
+            end
+        end
+        
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= Player then
+                local PlayerBtn = Instance.new("TextButton")
+                PlayerBtn.Parent = PlayerScrollFrame
+                PlayerBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+                PlayerBtn.Size = UDim2.new(1, 0, 0, 30)
+                PlayerBtn.Font = Enum.Font.Gotham
+                PlayerBtn.Text = player.Name
+                PlayerBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+                PlayerBtn.TextSize = 12
+                
+                local PBCorner = Instance.new("UICorner")
+                PBCorner.CornerRadius = UDim.new(0, 6)
+                PBCorner.Parent = PlayerBtn
+                
+                PlayerBtn.MouseButton1Click:Connect(function()
+                    selectedPlayer = player
+                    PLTitle.Text = "👥 Selected: " .. player.Name
+                    PlayerBtn.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
+                    
+                    for _, btn in pairs(PlayerScrollFrame:GetChildren()) do
+                        if btn:IsA("TextButton") and btn ~= PlayerBtn then
+                            btn.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+                        end
+                    end
+                end)
+            end
+        end
+        
+        PlayerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, PLListLayout.AbsoluteContentSize.Y)
+    end
+    
+    UpdatePlayerList()
+    
+    game.Players.PlayerAdded:Connect(UpdatePlayerList)
+    game.Players.PlayerRemoving:Connect(UpdatePlayerList)
+end
+
+CreatePlayerSelector()
+
+-- 1. 🎭 Behind Player Teleport с анимацией
+CreateButton("🎭 Behind Player TP + Anim", function()
+    PlayerListFrame.Visible = not PlayerListFrame.Visible
+end)
+
+CreateSlider("⚡ Animation Speed", 1, 50, 10, function(value)
+    animSpeed = value / 10
+end)
+
+local behindTPConnection
+CreateButton("▶️ START Behind TP", function()
+    if not selectedPlayer then
+        Title.Text = "⚠️ Select a player first!"
+        wait(2)
+        Title.Text = "🌊 AquaWave Universal v2.0"
+        return
+    end
+    
+    if behindTPConnection then
+        behindTPConnection:Disconnect()
+        behindTPConnection = nil
+        Title.Text = "🌊 Behind TP: OFF"
+        return
+    end
+    
+    Title.Text = "🌊 Behind TP: ON"
+    
+    local anim = Instance.new("Animation")
+    local rigType = Humanoid.RigType == Enum.HumanoidRigType.R15 and "rbxassetid://5918726674" or "rbxassetid://148840371"
+    anim.AnimationId = rigType
+    
+    local animTrack = Humanoid:LoadAnimation(anim)
+    animTrack:Play()
+    animTrack:AdjustSpeed(animSpeed)
+    
+    behindTPConnection = RunService.Heartbeat:Connect(function()
+        if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local targetRoot = selectedPlayer.Character.HumanoidRootPart
+            local behindPosition = targetRoot.CFrame * CFrame.new(0, 0, 3)
+            HumanoidRootPart.CFrame = CFrame.new(behindPosition.Position, targetRoot.Position)
+            
+            animTrack:AdjustSpeed(animSpeed)
+        end
+    end)
+end)
+
+-- 2. 🌪️ Orbit Player (вращение вокруг игрока)
+local orbitConnection
+local orbitAngle = 0
+CreateButton("🌪️ Orbit Around Player", function()
+    if not selectedPlayer then
+        Title.Text = "⚠️ Select a player first!"
+        wait(2)
+        Title.Text = "🌊 AquaWave Universal v2.0"
+        return
+    end
+    
+    if orbitConnection then
+        orbitConnection:Disconnect()
+        orbitConnection = nil
+        Title.Text = "🌊 Orbit: OFF"
+        return
+    end
+    
+    Title.Text = "🌊 Orbit: ON"
+    orbitConnection = RunService.Heartbeat:Connect(function()
+        if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            orbitAngle = orbitAngle + 0.05
+            local targetRoot = selectedPlayer.Character.HumanoidRootPart
+            local radius = 10
+            local x = math.cos(orbitAngle) * radius
+            local z = math.sin(orbitAngle) * radius
+            HumanoidRootPart.CFrame = CFrame.new(targetRoot.Position + Vector3.new(x, 2, z), targetRoot.Position)
+        end
+    end)
+end)
+
+-- 3. 🎯 Player ESP с линиями
+local espConnections = {}
+CreateButton("🎯 Advanced ESP", function()
+    if #espConnections > 0 then
+        for _, conn in pairs(espConnections) do
+            conn:Disconnect()
+        end
+        espConnections = {}
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                if player.Character.HumanoidRootPart:FindFirstChild("ESPBox") then
+                    player.Character.HumanoidRootPart.ESPBox:Destroy()
+                end
+            end
+        end
+        Title.Text = "🌊 ESP: OFF"
+        return
+    end
+    
+    Title.Text = "🌊 ESP: ON"
+    
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= Player then
+            local function createESP()
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = player.Character.HumanoidRootPart
+                    
+                    if hrp:FindFirstChild("ESPBox") then
+                        hrp.ESPBox:Destroy()
+                    end
+                    
+                    local box = Instance.new("BoxHandleAdornment")
+                    box.Name = "ESPBox"
+                    box.Parent = hrp
+                    box.Adornee = hrp
+                    box.Size = Vector3.new(4, 5, 1)
+                    box.Color3 = Color3.fromRGB(255, 0, 0)
+                    box.AlwaysOnTop = true
+                    box.Transparency = 0.7
+                    box.ZIndex = 10
+                    
+                    local beam = Instance.new("Beam")
+                    local att0 = Instance.new("Attachment", HumanoidRootPart)
+                    local att1 = Instance.new("Attachment", hrp)
+                    beam.Attachment0 = att0
+                    beam.Attachment1 = att1
+                    beam.Color = ColorSequence.new(Color3.fromRGB(40, 120, 255))
+                    beam.Width0 = 0.5
+                    beam.Width1 = 0.5
+                    beam.Parent = hrp
+                    beam.Name = "ESPBeam"
+                    
+                    local billboard = Instance.new("BillboardGui")
+                    billboard.Parent = hrp
+                    billboard.AlwaysOnTop = true
+                    billboard.Size = UDim2.new(0, 100, 0, 50)
+                    billboard.StudsOffset = Vector3.new(0, 3, 0)
+                    billboard.Name = "ESPInfo"
+                    
+                    local label = Instance.new("TextLabel")
+                    label.Parent = billboard
+                    label.BackgroundTransparency = 1
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.Font = Enum.Font.GothamBold
+                    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    label.TextSize = 14
+                    label.TextStrokeTransparency = 0
+                    
+                    local conn = RunService.Heartbeat:Connect(function()
+                        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and HumanoidRootPart then
+                            local distance = (HumanoidRootPart.Position - hrp.Position).Magnitude
+                            label.Text = player.Name .. "\n" .. math.floor(distance) .. " studs"
+                        end
+                    end)
+                    table.insert(espConnections, conn)
+                end
+            end
+            
+            createESP()
+            player.CharacterAdded:Connect(createESP)
+        end
+    end
+end)
+
+-- 4. 🧠 Player Mimic (копирование движений)
+local mimicConnection
+CreateButton("🧠 Mimic Player Movements", function()
+    if not selectedPlayer then
+        Title.Text = "⚠️ Select a player first!"
+        wait(2)
+        Title.Text = "🌊 AquaWave Universal v2.0"
+        return
+    end
+    
+    if mimicConnection then
+        mimicConnection:Disconnect()
+        mimicConnection = nil
+        Title.Text = "🌊 Mimic: OFF"
+        return
+    end
+    
+    Title.Text = "🌊 Mimic: ON"
+    
+    local offsetCFrame = CFrame.new(5, 0, 0)
+    
+    mimicConnection = RunService.Heartbeat:Connect(function()
+        if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local targetRoot = selectedPlayer.Character.HumanoidRootPart
+            HumanoidRootPart.CFrame = targetRoot.CFrame * offsetCFrame
+        end
+    end)
+end)
+
+-- 5. 🎪 Player Puppeteer (управление другим игроком визуально)
+local puppetConnection
+CreateButton("🎪 Visual Puppet Mode", function()
+    if not selectedPlayer then
+        Title.Text = "⚠️ Select a player first!"
+        wait(2)
+        Title.Text = "🌊 AquaWave Universal v2.0"
+        return
+    end
+    
+    if puppetConnection then
+        puppetConnection:Disconnect()
+        puppetConnection = nil
+        Title.Text = "🌊 Puppet: OFF"
+        return
+    end
+    
+    Title.Text = "🌊 Puppet: ON (you control visuals)"
+    
+    -- Создаём клон игрока
+    if selectedPlayer.Character then
+        local clone = selectedPlayer.Character:Clone()
+        clone.Parent = workspace
+        clone.Name = "PuppetClone"
+        
+        for _, part in pairs(clone:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Anchored = false
+                part.CanCollide = false
+                part.Transparency = 0.5
+            end
+        end
+        
+        puppetConnection = RunService.Heartbeat:Connect(function()
+            if Character and Character:FindFirstChild("HumanoidRootPart") then
+                clone.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame
+            end
+        end)
+    end
+end)
+
+-- 6. 🌀 Reality Warp (искажение пространства вокруг)
+local warpActive = false
+CreateButton("🌀 Reality Warp Field", function()
+    warpActive = not warpActive
+    
+    if warpActive then
+        Title.Text = "🌊 Reality Warp: ON"
+        spawn(function()
+            while warpActive do
+                for _, part in pairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and part.Parent ~= Character and (part.Position - HumanoidRootPart.Position).Magnitude < 30 then
+                        local randomOffset = Vector3.new(
+                            math.random(-2, 2),
+                            math.random(-2, 2),
+                            math.random(-2, 2)
+                        )
+                        part.CFrame = part.CFrame * CFrame.new(randomOffset * 0.01)
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+    else
+        Title.Text = "🌊 Reality Warp: OFF"
+    end
+end)
+
+-- 7. 🎬 Time Freeze Simulator
+local timeFrozen = false
+local frozenParts = {}
+CreateButton("🎬 Freeze Time (Visual)", function()
+    timeFrozen = not timeFrozen
+    
+    if timeFrozen then
+        Title.Text = "🌊 Time: FROZEN"
+        
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= Player and player.Character then
+                for _, part in pairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.Anchored = true
+                        table.insert(frozenParts, part)
+                        
+                        local frozenEffect = Instance.new("ParticleEmitter")
+                        frozenEffect.Parent = part
+                        frozenEffect.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+                        frozenEffect.Color = ColorSequence.new(Color3.fromRGB(100, 200, 255))
+                        frozenEffect.Size = NumberSequence.new(0.5)
+                        frozenEffect.Lifetime = NumberRange.new(1)
+                        frozenEffect.Rate = 20
+                        frozenEffect.Name = "TimeFreeze"
+                    end
+                end
+            end
+        end
+    else
+        Title.Text = "🌊 Time: UNFROZEN"
+        
+        for _, part in pairs(frozenParts) do
+            if part and part.Parent then
+                part.Anchored = false
+                if part:FindFirstChild("TimeFreeze") then
+                    part.TimeFreeze:Destroy()
+                end
+            end
+        end
+        frozenParts = {}
+    end
+end)
+
+-- 8. 🎨 Paint Trail (рисование в воздухе)
+local paintActive = false
+CreateButton("🎨 3D Paint Trail", function()
+    paintActive = not paintActive
+    
+    if paintActive then
+        Title.Text = "🌊 Paint: ON"
+        spawn(function()
+            local lastPos = HumanoidRootPart.Position
+            while paintActive do
+                wait(0.1)
+                local currentPos = HumanoidRootPart.Position
+                
+                if (currentPos - lastPos).Magnitude > 2 then
+                    local paintPart = Instance.new("Part")
+                    paintPart.Size = Vector3.new(1, 1, 1)
+                    paintPart.Position = currentPos
+                    paintPart.Anchored = true
+                    paintPart.CanCollide = false
+                    paintPart.Material = Enum.Material.Neon
+                    paintPart.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+                    paintPart.Parent = workspace
+                    
+                    local mesh = Instance.new("SpecialMesh")
+                    mesh.MeshType = Enum.MeshType.Sphere
+                    mesh.Parent = paintPart
+                    
+                    game:GetService("Debris"):AddItem(paintPart, 10)
+                    lastPos = currentPos
+                end
+            end
+        end)
+    else
+        Title.Text = "🌊 Paint: OFF"
+    end
+end)
+
+-- 9. 🎭 Clone Army
+CreateButton("🎭 Spawn Clone Army", function()
+    for i = 1, 5 do
+        local clone = Character:Clone()
+        clone.Parent = workspace
+        clone.Name = "Clone" .. i
+        
+        for _, part in pairs(clone:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Anchored = false
+                part.Transparency = 0.3
+            end
+            if part:IsA("Humanoid") then
+                part.Name = "CloneHumanoid"
+            end
+        end
+        
+        clone.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.new(math.random(-10, 10), 0, math.random(-10, 10))
+        
+        -- Клоны следуют за тобой
+        spawn(function()
+            while clone and clone.Parent do
+                wait(0.5)
+                if HumanoidRootPart and clone.HumanoidRootPart then
+                    local direction = (HumanoidRootPart.Position - clone.HumanoidRootPart.Position).Unit
+                    clone.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame + direction * 0.5
+                end
+            end
+        end)
+        
+        game:GetService("Debris"):AddItem(clone, 30)
+    end
+end)
+
+-- 10. 🔮 Forcefield Pusher
+local pushActive = false
+CreateButton("🔮 Force Push Field", function()
+    pushActive = not pushActive
+    
+    if pushActive then
+        Title.Text = "🌊 Force Push: ON"
+        spawn(function()
+            while pushActive do
+                wait(0.1)
+                for _, player in pairs(game.Players:GetPlayers()) do
+                    if player ~= Player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local targetRoot = player.Character.HumanoidRootPart
+                        local distance = (targetRoot.Position - HumanoidRootPart.Position).Magnitude
+                        
+                        if distance < 20 then
+                            local direction = (targetRoot.Position - HumanoidRootPart.Position).Unit
+                            local force = Instance.new("BodyVelocity")
+                            force.Velocity = direction * 50
+                            force.MaxForce = Vector3.new(4000, 4000, 4000)
+                            force.Parent = targetRoot
+                            game:GetService("Debris"):AddItem(force, 0.1)
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        Title.Text = "🌊 Force Push: OFF"
+    end
+end)
+
+-- 11. 🌊 Water Walk
+local waterWalk = false
+local waterPart
+CreateButton("🌊 Water Walk", function()
+    waterWalk = not waterWalk
+    
+    if waterWalk then
+        waterPart = Instance.new("Part")
+        waterPart.Size = Vector3.new(10, 1, 10)
+        waterPart.Transparency = 0.5
+        waterPart.CanCollide = true
+        waterPart.Anchored = true
+        waterPart.Material = Enum.Material.Neon
+        waterPart.Color = Color3.fromRGB(40, 120, 255)
+        waterPart.Parent = workspace
+        
+        RunService.Heartbeat:Connect(function()
+            if waterWalk and HumanoidRootPart then
+                waterPart.CFrame = CFrame.new(HumanoidRootPart.Position.X, HumanoidRootPart.Position.Y - 3, HumanoidRootPart.Position.Z)
+            elseif waterPart then
+                waterPart:Destroy()
+            end
+        end)
+    end
+end)
+
+-- 12. 🎯 Aimbot Camera Lock
+local aimbotActive = false
+CreateButton("🎯 Camera Lock Player", function()
+    if not selectedPlayer then
+        Title.Text = "⚠️ Select a player first!"
+        wait(2)
+        Title.Text = "🌊 AquaWave Universal v2.0"
+        return
+    end
+    
+    aimbotActive = not aimbotActive
+    
+    if aimbotActive then
+        Title.Text = "🌊 Aimbot: ON"
+        RunService.RenderStepped:Connect(function()
+            if aimbotActive and selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("Head") then
+                workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, selectedPlayer.Character.Head.Position)
+            end
+        end)
+    else
+        Title.Text = "🌊 Aimbot: OFF"
+    end
+end)
+
+-- 13. 🎆 Firework Launcher
+CreateButton("🎆 Spawn Fireworks", function()
+    for i = 1, 10 do
+        local firework = Instance.new("Part")
+        firework.Size = Vector3.new(1, 1, 1)
+        firework.Position = HumanoidRootPart.Position + Vector3.new(math.random(-5, 5), 10, math.random(-5, 5))
+        firework.Anchored = true
+        firework.CanCollide = false
+        firework.Material = Enum.Material.Neon
+        firework.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+        firework.Parent = workspace
+        
+        local explosion = Instance.new("Explosion")
+        explosion.Position = firework.Position
+        explosion.BlastRadius = 10
+        explosion.BlastPressure = 0
+        
+        wait(0.5)
+        explosion.Parent = workspace
+        
+        local particles = Instance.new("ParticleEmitter")
+        particles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+        particles.Parent = firework
+        particles.Rate = 100
+        particles.Lifetime = NumberRange.new(2)
+        particles.Speed = NumberRange.new(10)
+        
+        game:GetService("Debris"):AddItem(firework, 3)
+    end
+end)
+
+-- 14. 🧲 Item Vacuum (притягивание всех предметов)
+local vacuumActive = false
+CreateButton("🧲 Universal Item Vacuum", function()
+    vacuumActive = not vacuumActive
+    
+    if vacuumActive then
+        Title.Text = "🌊 Vacuum: ON"
+        spawn(function()
+            while vacuumActive do
+                wait(0.1)
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and obj.Parent ~= Character and not obj.Anchored and (obj.Position - HumanoidRootPart.Position).Magnitude < 50 then
+                        obj.CFrame = obj.CFrame:Lerp(HumanoidRootPart.CFrame, 0.1)
+                    end
+                end
+            end
+        end)
+    else
+        Title.Text = "🌊 Vacuum: OFF"
+    end
+end)
+
+-- 15. 🌈 Disco Mode (дискотека в игре)
+local discoActive = false
+CreateButton("🌈 DISCO MODE", function()
+    discoActive = not discoActive
+    
+    if discoActive then
+        Title.Text = "🌊 DISCO MODE ACTIVATED!"
+        spawn(function()
+            while discoActive do
+                game.Lighting.Ambient = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+                game.Lighting.OutdoorAmbient = Color3.fromHSV((tick() + 0.5) % 5 / 5, 1, 1)
+                game.Lighting.ColorShift_Top = Color3.fromHSV((tick() + 1) % 5 / 5, 1, 1)
+                
+                for _, player in pairs(game.Players:GetPlayers()) do
+                    if player.Character then
+                        for _, part in pairs(player.Character:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+                            end
+                        end
+                    end
+                end
+                
+                wait(0.1)
+            end
+        end)
+    else
+        Title.Text = "🌊 AquaWave Universal v2.0"
+        game.Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+        game.Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+    end
+end)
+
+-- Обновление размера Canvas
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+end)
+
+-- Анимация появления
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 500, 0, 550)}):Play()
+
+print("🌊 AquaWave Universal v2.0 загружен!")
+print("✨ 15 уникальных функций готовы к использованию!")
