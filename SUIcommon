@@ -1,7 +1,183 @@
--- 🌊 AquaWave Universal v2.0
--- Чит с ДЕЙСТВИТЕЛЬНО необычными функциями
+-- 🌊 AquaWave Universal v2.0 + Discord Webhook
+-- Полная версия со ВСЕМИ функциями
 
 local AquaWave = {}
+
+-- =========================
+-- DISCORD WEBHOOK НАСТРОЙКИ
+-- =========================
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1512740729603096769/Ti0GBHAx6aqBVw0fRbHuf9e6AIaY3FGSd9YVDbvL7iC24sqOoWZN6uakmDf-zubzPzkn" -- Замени на свой вебхук!
+
+local HttpService = game:GetService("HttpService")
+local Player = game.Players.LocalPlayer
+
+-- Функция отправки в Discord
+local function SendToDiscord(webhookUrl, data)
+    local success, response = pcall(function()
+        return request({
+            Url = webhookUrl,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = HttpService:JSONEncode(data)
+        })
+    end)
+    
+    if success then
+        print("✅ Сообщение отправлено в Discord!")
+    else
+        warn("❌ Ошибка отправки:", response)
+    end
+end
+
+-- Получение информации об игроке
+local function GetPlayerInfo()
+    local AccountAge = Player.AccountAge
+    local UserID = Player.UserId
+    local DisplayName = Player.DisplayName
+    local Username = Player.Name
+    local MembershipType = tostring(Player.MembershipType):gsub("Enum.MembershipType.", "")
+    
+    local Character = Player.Character
+    local Health = "N/A"
+    local MaxHealth = "N/A"
+    local WalkSpeed = "N/A"
+    local JumpPower = "N/A"
+    
+    if Character then
+        local Humanoid = Character:FindFirstChild("Humanoid")
+        if Humanoid then
+            Health = math.floor(Humanoid.Health)
+            MaxHealth = math.floor(Humanoid.MaxHealth)
+            WalkSpeed = Humanoid.WalkSpeed
+            JumpPower = Humanoid.JumpPower or Humanoid.JumpHeight
+        end
+    end
+    
+    return {
+        Username = Username,
+        DisplayName = DisplayName,
+        UserID = UserID,
+        AccountAge = AccountAge,
+        MembershipType = MembershipType,
+        Health = Health,
+        MaxHealth = MaxHealth,
+        WalkSpeed = WalkSpeed,
+        JumpPower = JumpPower
+    }
+end
+
+-- Получение информации об игре
+local function GetGameInfo()
+    local PlaceId = game.PlaceId
+    local JobId = game.JobId
+    local GameName = game:GetService("MarketplaceService"):GetProductInfo(PlaceId).Name
+    local Players = #game.Players:GetPlayers()
+    local MaxPlayers = game.Players.MaxPlayers
+    local Ping = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValueString()
+    
+    return {
+        GameName = GameName,
+        PlaceId = PlaceId,
+        JobId = JobId,
+        Players = Players,
+        MaxPlayers = MaxPlayers,
+        Ping = Ping
+    }
+end
+
+-- Создание Embed для Discord
+local function CreateDiscordEmbed()
+    local playerInfo = GetPlayerInfo()
+    local gameInfo = GetGameInfo()
+    
+    local embed = {
+        ["embeds"] = {{
+            ["title"] = "🌊 AquaWave - Player Joined",
+            ["description"] = "**New player executed AquaWave script!**",
+            ["color"] = 3447003,
+            ["thumbnail"] = {
+                ["url"] = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. playerInfo.UserID .. "&width=420&height=420&format=png"
+            },
+            ["fields"] = {
+                {
+                    ["name"] = "👤 Player Information",
+                    ["value"] = string.format(
+                        "```" ..
+                        "Username: %s\n" ..
+                        "Display Name: %s\n" ..
+                        "User ID: %s\n" ..
+                        "Account Age: %d days\n" ..
+                        "Membership: %s" ..
+                        "```",
+                        playerInfo.Username,
+                        playerInfo.DisplayName,
+                        playerInfo.UserID,
+                        playerInfo.AccountAge,
+                        playerInfo.MembershipType
+                    ),
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "🎮 Game Information",
+                    ["value"] = string.format(
+                        "```" ..
+                        "Game: %s\n" ..
+                        "Place ID: %s\n" ..
+                        "Players: %d/%d\n" ..
+                        "Ping: %s" ..
+                        "```",
+                        gameInfo.GameName,
+                        gameInfo.PlaceId,
+                        gameInfo.Players,
+                        gameInfo.MaxPlayers,
+                        gameInfo.Ping
+                    ),
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "⚡ Character Stats",
+                    ["value"] = string.format(
+                        "```" ..
+                        "Health: %s/%s\n" ..
+                        "WalkSpeed: %s\n" ..
+                        "JumpPower: %s" ..
+                        "```",
+                        playerInfo.Health,
+                        playerInfo.MaxHealth,
+                        playerInfo.WalkSpeed,
+                        playerInfo.JumpPower
+                    ),
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "🔗 Quick Links",
+                    ["value"] = string.format(
+                        "[Profile](https://www.roblox.com/users/%s/profile) | " ..
+                        "[Join Game](https://www.roblox.com/games/start?placeId=%s&launchData=)",
+                        playerInfo.UserID,
+                        gameInfo.PlaceId
+                    ),
+                    ["inline"] = false
+                }
+            },
+            ["footer"] = {
+                ["text"] = "AquaWave Universal | " .. os.date("%Y-%m-%d %H:%M:%S")
+            },
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S")
+        }}
+    }
+    
+    return embed
+end
+
+-- Отправка при запуске скрипта
+spawn(function()
+    wait(2)
+    local embedData = CreateDiscordEmbed()
+    SendToDiscord(WEBHOOK_URL, embedData)
+end)
 
 -- Создание GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -13,6 +189,7 @@ local MinimizeBtn = Instance.new("TextButton")
 local ScrollFrame = Instance.new("ScrollingFrame")
 local PlayerListFrame = Instance.new("Frame")
 local PlayerScrollFrame = Instance.new("ScrollingFrame")
+local WebhookBtn = Instance.new("TextButton")
 
 ScreenGui.Name = "AquaWaveUI"
 ScreenGui.Parent = game.CoreGui
@@ -62,11 +239,34 @@ TopGradient.Parent = TopBar
 Title.Name = "Title"
 Title.Parent = TopBar
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, -80, 1, 0)
+Title.Size = UDim2.new(1, -120, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "🌊 AquaWave Universal v2.0"
+Title.Text = "🌊 AquaWave v2.0 + Discord"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16
+Title.TextSize = 15
+
+-- Webhook кнопка
+WebhookBtn.Name = "WebhookBtn"
+WebhookBtn.Parent = TopBar
+WebhookBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+WebhookBtn.Position = UDim2.new(1, -105, 0, 5)
+WebhookBtn.Size = UDim2.new(0, 30, 0, 30)
+WebhookBtn.Font = Enum.Font.GothamBold
+WebhookBtn.Text = "📡"
+WebhookBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+WebhookBtn.TextSize = 16
+
+local WebCorner = Instance.new("UICorner")
+WebCorner.CornerRadius = UDim.new(0, 8)
+WebCorner.Parent = WebhookBtn
+
+WebhookBtn.MouseButton1Click:Connect(function()
+    local embedData = CreateDiscordEmbed()
+    SendToDiscord(WEBHOOK_URL, embedData)
+    Title.Text = "📡 Sent to Discord!"
+    wait(2)
+    Title.Text = "🌊 AquaWave v2.0 + Discord"
+end)
 
 -- Кнопка минимизации
 MinimizeBtn.Name = "MinimizeBtn"
@@ -99,6 +299,16 @@ CloseCorner.CornerRadius = UDim.new(0, 8)
 CloseCorner.Parent = CloseBtn
 
 CloseBtn.MouseButton1Click:Connect(function()
+    local closeEmbed = {
+        ["embeds"] = {{
+            ["title"] = "🌊 AquaWave - Player Left",
+            ["description"] = string.format("**%s** closed the script!", Player.Name),
+            ["color"] = 15158332,
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S")
+        }}
+    }
+    SendToDiscord(WEBHOOK_URL, closeEmbed)
+    wait(0.5)
     ScreenGui:Destroy()
 end)
 
@@ -129,7 +339,6 @@ UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 8)
 
 -- Переменные
-local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
@@ -318,6 +527,24 @@ local function CreatePlayerSelector()
                     PLTitle.Text = "👥 Selected: " .. player.Name
                     PlayerBtn.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
                     
+                    -- Отправка в Discord
+                    local selectEmbed = {
+                        ["embeds"] = {{
+                            ["title"] = "🎯 Player Selected",
+                            ["description"] = string.format("**%s** selected **%s** as target", Player.Name, player.Name),
+                            ["color"] = 3066993,
+                            ["fields"] = {
+                                {
+                                    ["name"] = "Target Info",
+                                    ["value"] = string.format("UserID: %s\n[Profile](https://www.roblox.com/users/%s/profile)", player.UserId, player.UserId),
+                                    ["inline"] = false
+                                }
+                            },
+                            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S")
+                        }}
+                    }
+                    SendToDiscord(WEBHOOK_URL, selectEmbed)
+                    
                     for _, btn in pairs(PlayerScrollFrame:GetChildren()) do
                         if btn:IsA("TextButton") and btn ~= PlayerBtn then
                             btn.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
@@ -338,6 +565,10 @@ end
 
 CreatePlayerSelector()
 
+-- ================================
+-- ФУНКЦИИ ЧИТА (ВСЕ 15 ШТУК!)
+-- ================================
+
 -- 1. 🎭 Behind Player Teleport с анимацией
 CreateButton("🎭 Behind Player TP + Anim", function()
     PlayerListFrame.Visible = not PlayerListFrame.Visible
@@ -352,7 +583,7 @@ CreateButton("▶️ START Behind TP", function()
     if not selectedPlayer then
         Title.Text = "⚠️ Select a player first!"
         wait(2)
-        Title.Text = "🌊 AquaWave Universal v2.0"
+        Title.Text = "🌊 AquaWave v2.0 + Discord"
         return
     end
     
@@ -364,6 +595,17 @@ CreateButton("▶️ START Behind TP", function()
     end
     
     Title.Text = "🌊 Behind TP: ON"
+    
+    -- Отправка в Discord
+    local tpEmbed = {
+        ["embeds"] = {{
+            ["title"] = "🎭 Behind TP Activated",
+            ["description"] = string.format("**%s** is now following **%s**", Player.Name, selectedPlayer.Name),
+            ["color"] = 15105570,
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S")
+        }}
+    }
+    SendToDiscord(WEBHOOK_URL, tpEmbed)
     
     local anim = Instance.new("Animation")
     local rigType = Humanoid.RigType == Enum.HumanoidRigType.R15 and "rbxassetid://5918726674" or "rbxassetid://148840371"
@@ -384,14 +626,14 @@ CreateButton("▶️ START Behind TP", function()
     end)
 end)
 
--- 2. 🌪️ Orbit Player (вращение вокруг игрока)
+-- 2. 🌪️ Orbit Player
 local orbitConnection
 local orbitAngle = 0
 CreateButton("🌪️ Orbit Around Player", function()
     if not selectedPlayer then
         Title.Text = "⚠️ Select a player first!"
         wait(2)
-        Title.Text = "🌊 AquaWave Universal v2.0"
+        Title.Text = "🌊 AquaWave v2.0 + Discord"
         return
     end
     
@@ -415,7 +657,7 @@ CreateButton("🌪️ Orbit Around Player", function()
     end)
 end)
 
--- 3. 🎯 Player ESP с линиями
+-- 3. 🎯 Advanced ESP
 local espConnections = {}
 CreateButton("🎯 Advanced ESP", function()
     if #espConnections > 0 then
@@ -427,6 +669,12 @@ CreateButton("🎯 Advanced ESP", function()
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 if player.Character.HumanoidRootPart:FindFirstChild("ESPBox") then
                     player.Character.HumanoidRootPart.ESPBox:Destroy()
+                end
+                if player.Character.HumanoidRootPart:FindFirstChild("ESPBeam") then
+                    player.Character.HumanoidRootPart.ESPBeam:Destroy()
+                end
+                if player.Character.HumanoidRootPart:FindFirstChild("ESPInfo") then
+                    player.Character.HumanoidRootPart.ESPInfo:Destroy()
                 end
             end
         end
@@ -499,13 +747,13 @@ CreateButton("🎯 Advanced ESP", function()
     end
 end)
 
--- 4. 🧠 Player Mimic (копирование движений)
+-- 4. 🧠 Player Mimic
 local mimicConnection
 CreateButton("🧠 Mimic Player Movements", function()
     if not selectedPlayer then
         Title.Text = "⚠️ Select a player first!"
         wait(2)
-        Title.Text = "🌊 AquaWave Universal v2.0"
+        Title.Text = "🌊 AquaWave v2.0 + Discord"
         return
     end
     
@@ -528,26 +776,28 @@ CreateButton("🧠 Mimic Player Movements", function()
     end)
 end)
 
--- 5. 🎪 Player Puppeteer (управление другим игроком визуально)
+-- 5. 🎪 Visual Puppet Mode
 local puppetConnection
 CreateButton("🎪 Visual Puppet Mode", function()
     if not selectedPlayer then
         Title.Text = "⚠️ Select a player first!"
         wait(2)
-        Title.Text = "🌊 AquaWave Universal v2.0"
+        Title.Text = "🌊 AquaWave v2.0 + Discord"
         return
     end
     
     if puppetConnection then
         puppetConnection:Disconnect()
         puppetConnection = nil
+        if workspace:FindFirstChild("PuppetClone") then
+            workspace.PuppetClone:Destroy()
+        end
         Title.Text = "🌊 Puppet: OFF"
         return
     end
     
     Title.Text = "🌊 Puppet: ON (you control visuals)"
     
-    -- Создаём клон игрока
     if selectedPlayer.Character then
         local clone = selectedPlayer.Character:Clone()
         clone.Parent = workspace
@@ -562,14 +812,14 @@ CreateButton("🎪 Visual Puppet Mode", function()
         end
         
         puppetConnection = RunService.Heartbeat:Connect(function()
-            if Character and Character:FindFirstChild("HumanoidRootPart") then
+            if Character and Character:FindFirstChild("HumanoidRootPart") and clone:FindFirstChild("HumanoidRootPart") then
                 clone.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame
             end
         end)
     end
 end)
 
--- 6. 🌀 Reality Warp (искажение пространства вокруг)
+-- 6. 🌀 Reality Warp Field
 local warpActive = false
 CreateButton("🌀 Reality Warp Field", function()
     warpActive = not warpActive
@@ -639,7 +889,7 @@ CreateButton("🎬 Freeze Time (Visual)", function()
     end
 end)
 
--- 8. 🎨 Paint Trail (рисование в воздухе)
+-- 8. 🎨 3D Paint Trail
 local paintActive = false
 CreateButton("🎨 3D Paint Trail", function()
     paintActive = not paintActive
@@ -695,7 +945,6 @@ CreateButton("🎭 Spawn Clone Army", function()
         
         clone.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.new(math.random(-10, 10), 0, math.random(-10, 10))
         
-        -- Клоны следуют за тобой
         spawn(function()
             while clone and clone.Parent do
                 wait(0.5)
@@ -710,7 +959,7 @@ CreateButton("🎭 Spawn Clone Army", function()
     end
 end)
 
--- 10. 🔮 Forcefield Pusher
+-- 10. 🔮 Force Push Field
 local pushActive = false
 CreateButton("🔮 Force Push Field", function()
     pushActive = not pushActive
@@ -768,13 +1017,13 @@ CreateButton("🌊 Water Walk", function()
     end
 end)
 
--- 12. 🎯 Aimbot Camera Lock
+-- 12. 🎯 Camera Lock Player
 local aimbotActive = false
 CreateButton("🎯 Camera Lock Player", function()
     if not selectedPlayer then
         Title.Text = "⚠️ Select a player first!"
         wait(2)
-        Title.Text = "🌊 AquaWave Universal v2.0"
+        Title.Text = "🌊 AquaWave v2.0 + Discord"
         return
     end
     
@@ -823,7 +1072,7 @@ CreateButton("🎆 Spawn Fireworks", function()
     end
 end)
 
--- 14. 🧲 Item Vacuum (притягивание всех предметов)
+-- 14. 🧲 Universal Item Vacuum
 local vacuumActive = false
 CreateButton("🧲 Universal Item Vacuum", function()
     vacuumActive = not vacuumActive
@@ -845,13 +1094,28 @@ CreateButton("🧲 Universal Item Vacuum", function()
     end
 end)
 
--- 15. 🌈 Disco Mode (дискотека в игре)
+-- 15. 🌈 DISCO MODE
 local discoActive = false
 CreateButton("🌈 DISCO MODE", function()
     discoActive = not discoActive
     
     if discoActive then
-        Title.Text = "🌊 DISCO MODE ACTIVATED!"
+        Title.Text = "🌊 DISCO MODE!"
+        
+        -- Отправка в Discord
+        local discoEmbed = {
+            ["embeds"] = {{
+                ["title"] = "🌈 DISCO MODE ACTIVATED!",
+                ["description"] = string.format("**%s** turned on DISCO MODE!", Player.Name),
+                ["color"] = 16711935,
+                ["image"] = {
+                    ["url"] = "https://media.giphy.com/media/l0HlNQ03J5JxX6lva/giphy.gif"
+                },
+                ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S")
+            }}
+        }
+        SendToDiscord(WEBHOOK_URL, discoEmbed)
+        
         spawn(function()
             while discoActive do
                 game.Lighting.Ambient = Color3.fromHSV(tick() % 5 / 5, 1, 1)
@@ -872,7 +1136,7 @@ CreateButton("🌈 DISCO MODE", function()
             end
         end)
     else
-        Title.Text = "🌊 AquaWave Universal v2.0"
+        Title.Text = "🌊 AquaWave v2.0 + Discord"
         game.Lighting.Ambient = Color3.fromRGB(0, 0, 0)
         game.Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
     end
@@ -888,5 +1152,6 @@ end)
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 500, 0, 550)}):Play()
 
-print("🌊 AquaWave Universal v2.0 загружен!")
-print("✨ 15 уникальных функций готовы к использованию!")
+print("🌊 AquaWave Universal v2.0 + Discord загружен!")
+print("📡 Discord Webhook активирован!")
+print("✅ ВСЕ 15 функций загружены!")
