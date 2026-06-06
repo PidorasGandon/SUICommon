@@ -1,5 +1,4 @@
--- Ultimate Cheat Detector
--- Полная проверка всех возможных функций эксплойта
+
 
 local Library = {}
 
@@ -85,7 +84,7 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.Size = UDim2.new(0.5, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "🛡️ ULTIMATE DETECTOR"
+Title.Text = "BurmaldaTESTFUNC"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 20
 Title.TextXAlignment = Enum.TextXAlignment.Left
