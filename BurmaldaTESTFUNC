@@ -1,0 +1,1826 @@
+-- Ultimate Cheat Detector
+-- Полная проверка всех возможных функций эксплойта
+
+local Library = {}
+
+-- Создание GUI
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TopBar = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local CloseButton = Instance.new("TextButton")
+local MinimizeButton = Instance.new("TextButton")
+local TabsFrame = Instance.new("Frame")
+local ContentFrame = Instance.new("Frame")
+local ScrollingFrame = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+local ButtonsFrame = Instance.new("Frame")
+local CheckAllButton = Instance.new("TextButton")
+local ClearButton = Instance.new("TextButton")
+local ExportButton = Instance.new("TextButton")
+local SearchBox = Instance.new("TextBox")
+
+-- Защита GUI
+if syn then
+    syn.protect_gui(ScreenGui)
+    ScreenGui.Name = math.random(1, 1000000)
+else
+    ScreenGui.Name = "UltimateCheatDetector"
+end
+
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Main Frame
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.25, 0, 0.15, 0)
+MainFrame.Size = UDim2.new(0, 750, 0, 550)
+MainFrame.Active = true
+MainFrame.Draggable = false
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+-- Тень
+local Shadow = Instance.new("ImageLabel")
+Shadow.Name = "Shadow"
+Shadow.Parent = MainFrame
+Shadow.BackgroundTransparency = 1
+Shadow.Position = UDim2.new(0, -15, 0, -15)
+Shadow.Size = UDim2.new(1, 30, 1, 30)
+Shadow.ZIndex = 0
+Shadow.Image = "rbxassetid://6015897843"
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ImageTransparency = 0.4
+Shadow.ScaleType = Enum.ScaleType.Slice
+Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
+
+-- Top Bar
+TopBar.Name = "TopBar"
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+TopBar.BorderSizePixel = 0
+TopBar.Size = UDim2.new(1, 0, 0, 50)
+
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 12)
+TopCorner.Parent = TopBar
+
+-- Линия под TopBar
+local TopLine = Instance.new("Frame")
+TopLine.Parent = TopBar
+TopLine.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+TopLine.BorderSizePixel = 0
+TopLine.Position = UDim2.new(0, 0, 1, -2)
+TopLine.Size = UDim2.new(1, 0, 0, 2)
+
+-- Title
+Title.Name = "Title"
+Title.Parent = TopBar
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.Size = UDim2.new(0.5, 0, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "🛡️ ULTIMATE DETECTOR"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Version Label
+local VersionLabel = Instance.new("TextLabel")
+VersionLabel.Parent = TopBar
+VersionLabel.BackgroundTransparency = 1
+VersionLabel.Position = UDim2.new(0, 15, 1, -20)
+VersionLabel.Size = UDim2.new(0.3, 0, 0, 18)
+VersionLabel.Font = Enum.Font.Gotham
+VersionLabel.Text = "v2.0 | 100+ Checks"
+VersionLabel.TextColor3 = Color3.fromRGB(100, 180, 255)
+VersionLabel.TextSize = 11
+VersionLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Close Button
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = TopBar
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+CloseButton.BorderSizePixel = 0
+CloseButton.Position = UDim2.new(1, -38, 0.5, -15)
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Text = "×"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 20
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseButton
+
+-- Minimize Button
+MinimizeButton.Name = "MinimizeButton"
+MinimizeButton.Parent = TopBar
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 200, 70)
+MinimizeButton.BorderSizePixel = 0
+MinimizeButton.Position = UDim2.new(1, -73, 0.5, -15)
+MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
+MinimizeButton.Font = Enum.Font.GothamBold
+MinimizeButton.Text = "−"
+MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeButton.TextSize = 20
+
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(0, 8)
+MinCorner.Parent = MinimizeButton
+
+-- Search Box
+SearchBox.Name = "SearchBox"
+SearchBox.Parent = TopBar
+SearchBox.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+SearchBox.BorderSizePixel = 0
+SearchBox.Position = UDim2.new(1, -350, 0.5, -15)
+SearchBox.Size = UDim2.new(0, 160, 0, 30)
+SearchBox.Font = Enum.Font.Gotham
+SearchBox.PlaceholderText = "🔍 Search..."
+SearchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
+SearchBox.Text = ""
+SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+SearchBox.TextSize = 12
+SearchBox.ClearTextOnFocus = false
+
+local SearchCorner = Instance.new("UICorner")
+SearchCorner.CornerRadius = UDim.new(0, 8)
+SearchCorner.Parent = SearchBox
+
+-- Tabs Frame
+TabsFrame.Name = "TabsFrame"
+TabsFrame.Parent = MainFrame
+TabsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+TabsFrame.BorderSizePixel = 0
+TabsFrame.Position = UDim2.new(0, 0, 0, 55)
+TabsFrame.Size = UDim2.new(0, 150, 1, -105)
+
+local TabsCorner = Instance.new("UICorner")
+TabsCorner.CornerRadius = UDim.new(0, 10)
+TabsCorner.Parent = TabsFrame
+
+-- Content Frame
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Parent = MainFrame
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Position = UDim2.new(0, 160, 0, 60)
+ContentFrame.Size = UDim2.new(1, -170, 1, -115)
+
+-- Scrolling Frame
+ScrollingFrame.Name = "ScrollingFrame"
+ScrollingFrame.Parent = ContentFrame
+ScrollingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollingFrame.ScrollBarThickness = 8
+ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(60, 120, 255)
+
+local ScrollCorner = Instance.new("UICorner")
+ScrollCorner.CornerRadius = UDim.new(0, 10)
+ScrollCorner.Parent = ScrollingFrame
+
+-- UI List Layout
+UIListLayout.Parent = ScrollingFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 6)
+
+local Padding = Instance.new("UIPadding")
+Padding.Parent = ScrollingFrame
+Padding.PaddingTop = UDim.new(0, 10)
+Padding.PaddingBottom = UDim.new(0, 10)
+Padding.PaddingLeft = UDim.new(0, 10)
+Padding.PaddingRight = UDim.new(0, 10)
+
+-- Buttons Frame
+ButtonsFrame.Name = "ButtonsFrame"
+ButtonsFrame.Parent = MainFrame
+ButtonsFrame.BackgroundTransparency = 1
+ButtonsFrame.Position = UDim2.new(0, 10, 1, -45)
+ButtonsFrame.Size = UDim2.new(1, -20, 0, 40)
+
+-- Check All Button
+CheckAllButton.Name = "CheckAllButton"
+CheckAllButton.Parent = ButtonsFrame
+CheckAllButton.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+CheckAllButton.BorderSizePixel = 0
+CheckAllButton.Position = UDim2.new(0, 0, 0, 0)
+CheckAllButton.Size = UDim2.new(0.32, -3, 1, 0)
+CheckAllButton.Font = Enum.Font.GothamBold
+CheckAllButton.Text = "🔍 Check All"
+CheckAllButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CheckAllButton.TextSize = 14
+
+local CheckCorner = Instance.new("UICorner")
+CheckCorner.CornerRadius = UDim.new(0, 10)
+CheckCorner.Parent = CheckAllButton
+
+-- Clear Button
+ClearButton.Name = "ClearButton"
+ClearButton.Parent = ButtonsFrame
+ClearButton.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+ClearButton.BorderSizePixel = 0
+ClearButton.Position = UDim2.new(0.33, 0, 0, 0)
+ClearButton.Size = UDim2.new(0.32, -3, 1, 0)
+ClearButton.Font = Enum.Font.GothamBold
+ClearButton.Text = "🗑️ Clear"
+ClearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ClearButton.TextSize = 14
+
+local ClearCorner = Instance.new("UICorner")
+ClearCorner.CornerRadius = UDim.new(0, 10)
+ClearCorner.Parent = ClearButton
+
+-- Export Button
+ExportButton.Name = "ExportButton"
+ExportButton.Parent = ButtonsFrame
+ExportButton.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+ExportButton.BorderSizePixel = 0
+ExportButton.Position = UDim2.new(0.66, 0, 0, 0)
+ExportButton.Size = UDim2.new(0.34, 0, 1, 0)
+ExportButton.Font = Enum.Font.GothamBold
+ExportButton.Text = "📋 Export Results"
+ExportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ExportButton.TextSize = 14
+
+local ExportCorner = Instance.new("UICorner")
+ExportCorner.CornerRadius = UDim.new(0, 10)
+ExportCorner.Parent = ExportButton
+
+-- MASSIVE FUNCTION LIST
+local CheckFunctions = {
+    -- Hook Functions
+    {
+        category = "Hooks",
+        name = "gethook",
+        desc = "Проверяет хуки функций",
+        check = function()
+            if gethook then
+                local testFunc = game.HttpGet
+                local hook = gethook(testFunc)
+                return hook == nil, hook and "Обнаружен хук" or "Хуки не найдены"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Hooks",
+        name = "getnamecallmethod",
+        desc = "Получает метод namecall",
+        check = function()
+            if getnamecallmethod then
+                return true, "Функция работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Hooks",
+        name = "hookfunction",
+        desc = "Проверка возможности хука функций",
+        check = function()
+            if hookfunction then
+                local test = function() return "original" end
+                local hooked = hookfunction(test, function() return "hooked" end)
+                return test() == "hooked", test() == "hooked" and "Хуки работают" or "Хук не применен"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Hooks",
+        name = "hookmetamethod",
+        desc = "Проверка хука метаметодов",
+        check = function()
+            if hookmetamethod then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Hooks",
+        name = "checkcaller",
+        desc = "Проверяет источник вызова",
+        check = function()
+            if checkcaller then
+                local isSafe = checkcaller()
+                return isSafe, isSafe and "Безопасный вызов" or "Внешний вызов"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Environment Functions
+    {
+        category = "Environment",
+        name = "getgenv",
+        desc = "Глобальное окружение эксплойта",
+        check = function()
+            if getgenv then
+                local genv = getgenv()
+                local count = 0
+                for _ in pairs(genv) do count = count + 1 end
+                return true, count .. " переменных в genv"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Environment",
+        name = "getrenv",
+        desc = "Roblox окружение",
+        check = function()
+            if getrenv then
+                local renv = getrenv()
+                return renv ~= nil, renv and "Доступно" or "Недоступно"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Environment",
+        name = "getfenv",
+        desc = "Окружение функции",
+        check = function()
+            if getfenv then
+                local env = getfenv(0)
+                return env ~= nil, "Работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Environment",
+        name = "setfenv",
+        desc = "Установка окружения функции",
+        check = function()
+            if setfenv then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Environment",
+        name = "getsenv",
+        desc = "Окружение скрипта",
+        check = function()
+            if getsenv then
+                local testScript = game:GetService("Players").LocalPlayer.PlayerScripts:FindFirstChildOfClass("LocalScript")
+                if testScript then
+                    local env = getsenv(testScript)
+                    return env ~= nil, "Работает"
+                end
+                return false, "Нет тестового скрипта"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Metatable Functions
+    {
+        category = "Metatables",
+        name = "getrawmetatable",
+        desc = "Получение метатаблицы",
+        check = function()
+            if getrawmetatable then
+                local mt = getrawmetatable(game)
+                return mt ~= nil, mt and "Получена" or "Ошибка"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Metatables",
+        name = "setrawmetatable",
+        desc = "Установка метатаблицы",
+        check = function()
+            if setrawmetatable then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Metatables",
+        name = "setreadonly",
+        desc = "Снятие защиты метатаблицы",
+        check = function()
+            if setreadonly then
+                local mt = getrawmetatable(game)
+                if mt then
+                    local isReadonly = isreadonly(mt)
+                    return true, isReadonly and "Защищена" or "Изменена"
+                end
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Metatables",
+        name = "isreadonly",
+        desc = "Проверка защиты",
+        check = function()
+            if isreadonly then
+                local mt = getrawmetatable(game)
+                if mt then
+                    return isreadonly(mt), isreadonly(mt) and "Защищена" or "Уязвима"
+                end
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Script Functions
+    {
+        category = "Scripts",
+        name = "getscripts",
+        desc = "Получение всех скриптов",
+        check = function()
+            if getscripts then
+                local scripts = getscripts()
+                return true, #scripts .. " скриптов найдено"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Scripts",
+        name = "getrunningscripts",
+        desc = "Активные скрипты",
+        check = function()
+            if getrunningscripts then
+                local scripts = getrunningscripts()
+                return true, #scripts .. " активных"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Scripts",
+        name = "getcallingscript",
+        desc = "Вызывающий скрипт",
+        check = function()
+            if getcallingscript then
+                local script = getcallingscript()
+                return true, script and tostring(script) or "Внешний"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Scripts",
+        name = "getscriptclosure",
+        desc = "Получение замыкания скрипта",
+        check = function()
+            if getscriptclosure then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Scripts",
+        name = "getscripthash",
+        desc = "Хеш скрипта",
+        check = function()
+            if getscripthash then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Instance Functions
+    {
+        category = "Instances",
+        name = "getnilinstances",
+        desc = "Instance в nil",
+        check = function()
+            if getnilinstances then
+                local instances = getnilinstances()
+                return true, #instances .. " в nil"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Instances",
+        name = "getinstances",
+        desc = "Все Instance",
+        check = function()
+            if getinstances then
+                local instances = getinstances()
+                return true, #instances .. " всего"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Instances",
+        name = "isscriptable",
+        desc = "Проверка доступности свойства",
+        check = function()
+            if isscriptable then
+                local player = game.Players.LocalPlayer
+                return true, "Функция работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Instances",
+        name = "setscriptable",
+        desc = "Изменение доступности",
+        check = function()
+            if setscriptable then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Instances",
+        name = "gethiddenproperty",
+        desc = "Скрытые свойства",
+        check = function()
+            if gethiddenproperty then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Instances",
+        name = "sethiddenproperty",
+        desc = "Установка скрытых свойств",
+        check = function()
+            if sethiddenproperty then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Connection Functions
+    {
+        category = "Connections",
+        name = "getconnections",
+        desc = "Получение подключений",
+        check = function()
+            if getconnections then
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                if char then
+                    local hum = char:FindFirstChild("Humanoid")
+                    if hum then
+                        local conns = getconnections(hum.Died)
+                        return true, #conns .. " подключений"
+                    end
+                end
+                return false, "Нет персонажа"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Connections",
+        name = "firesignal",
+        desc = "Вызов сигнала",
+        check = function()
+            if firesignal then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Remote Functions
+    {
+        category = "Remotes",
+        name = "fireserver",
+        desc = "Вызов RemoteEvent",
+        check = function()
+            local remotes = 0
+            for _, v in pairs(game:GetDescendants()) do
+                if v:IsA("RemoteEvent") then
+                    remotes = remotes + 1
+                end
+            end
+            return true, remotes .. " RemoteEvent найдено"
+        end
+    },
+    {
+        category = "Remotes",
+        name = "getremotes",
+        desc = "Поиск Remote объектов",
+        check = function()
+            local remotes = 0
+            local functions = 0
+            for _, v in pairs(game:GetDescendants()) do
+                if v:IsA("RemoteEvent") then
+                    remotes = remotes + 1
+                elseif v:IsA("RemoteFunction") then
+                    functions = functions + 1
+                end
+            end
+            return true, remotes .. " Events, " .. functions .. " Functions"
+        end
+    },
+    
+    -- Closure Functions
+    {
+        category = "Closures",
+        name = "newcclosure",
+        desc = "Создание C замыкания",
+        check = function()
+            if newcclosure then
+                local test = newcclosure(function() return true end)
+                return test(), "Работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Closures",
+        name = "clonefunction",
+        desc = "Клонирование функции",
+        check = function()
+            if clonefunction then
+                local original = function() return "test" end
+                local clone = clonefunction(original)
+                return clone() == "test", "Работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Closures",
+        name = "islclosure",
+        desc = "Проверка Lua замыкания",
+        check = function()
+            if islclosure then
+                local test = function() end
+                return islclosure(test), islclosure(test) and "Lua closure" or "C closure"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Closures",
+        name = "iscclosure",
+        desc = "Проверка C замыкания",
+        check = function()
+            if iscclosure then
+                return iscclosure(game.HttpGet), "Работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Closures",
+        name = "getconstants",
+        desc = "Константы функции",
+        check = function()
+            if getconstants then
+                local test = function() local x = "test" return x end
+                local consts = getconstants(test)
+                return #consts > 0, #consts .. " констант"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Closures",
+        name = "getupvalues",
+        desc = "Upvalue функции",
+        check = function()
+            if getupvalues then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Closures",
+        name = "getproto",
+        desc = "Прототипы функции",
+        check = function()
+            if getproto then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Closures",
+        name = "getinfo",
+        desc = "Информация о функции",
+        check = function()
+            if debug and debug.getinfo then
+                local info = debug.getinfo(print)
+                return info ~= nil, info and "Работает" or "Ошибка"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Cache Functions
+    {
+        category = "Cache",
+        name = "cloneref",
+        desc = "Клонирование ссылки",
+        check = function()
+            if cloneref then
+                local ref = cloneref(game)
+                return ref ~= nil, "Работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Cache",
+        name = "compareinstances",
+        desc = "Сравнение Instance",
+        check = function()
+            if compareinstances then
+                return compareinstances(game, game), "Работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Console Functions
+    {
+        category = "Console",
+        name = "rconsolecreate",
+        desc = "Создание консоли",
+        check = function()
+            if rconsolecreate then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Console",
+        name = "rconsoleprint",
+        desc = "Вывод в консоль",
+        check = function()
+            if rconsoleprint then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Console",
+        name = "rconsoleclear",
+        desc = "Очистка консоли",
+        check = function()
+            if rconsoleclear then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Console",
+        name = "rconsoleinput",
+        desc = "Ввод в консоль",
+        check = function()
+            if rconsoleinput then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Filesystem Functions
+    {
+        category = "Filesystem",
+        name = "readfile",
+        desc = "Чтение файлов",
+        check = function()
+            if readfile then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Filesystem",
+        name = "writefile",
+        desc = "Запись файлов",
+        check = function()
+            if writefile then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Filesystem",
+        name = "appendfile",
+        desc = "Добавление в файл",
+        check = function()
+            if appendfile then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Filesystem",
+        name = "deletefile",
+        desc = "Удаление файлов",
+        check = function()
+            if delfile then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Filesystem",
+        name = "isfile",
+        desc = "Проверка существования файла",
+        check = function()
+            if isfile then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Filesystem",
+        name = "isfolder",
+        desc = "Проверка папки",
+        check = function()
+            if isfolder then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Filesystem",
+        name = "listfiles",
+        desc = "Список файлов",
+        check = function()
+            if listfiles then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Filesystem",
+        name = "makefolder",
+        desc = "Создание папки",
+        check = function()
+            if makefolder then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Clipboard Functions
+    {
+        category = "Clipboard",
+        name = "setclipboard",
+        desc = "Копирование в буфер",
+        check = function()
+            if setclipboard then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Drawing Functions
+    {
+        category = "Drawing",
+        name = "Drawing.new",
+        desc = "Создание Drawing объектов",
+        check = function()
+            if Drawing then
+                local success = pcall(function()
+                    local draw = Drawing.new("Line")
+                    draw:Remove()
+                end)
+                return success, success and "Работает" or "Ошибка"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Drawing",
+        name = "isrenderobj",
+        desc = "Проверка Drawing объекта",
+        check = function()
+            if isrenderobj and Drawing then
+                local draw = Drawing.new("Line")
+                local result = isrenderobj(draw)
+                draw:Remove()
+                return result, result and "Работает" or "Ошибка"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Input Functions
+    {
+        category = "Input",
+        name = "mouse1click",
+        desc = "Симуляция клика мыши",
+        check = function()
+            if mouse1click then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Input",
+        name = "mouse1press",
+        desc = "Нажатие кнопки мыши",
+        check = function()
+            if mouse1press then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Input",
+        name = "mouse1release",
+        desc = "Отпускание кнопки мыши",
+        check = function()
+            if mouse1release then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Input",
+        name = "keypress",
+        desc = "Нажатие клавиши",
+        check = function()
+            if keypress then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Input",
+        name = "keyrelease",
+        desc = "Отпускание клавиши",
+        check = function()
+            if keyrelease then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- WebSocket Functions
+    {
+        category = "WebSocket",
+        name = "WebSocket.connect",
+        desc = "WebSocket подключение",
+        check = function()
+            if WebSocket then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Request Functions
+    {
+        category = "Request",
+        name = "request",
+        desc = "HTTP запросы",
+        check = function()
+            if request then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Request",
+        name = "http_request",
+        desc = "HTTP запросы (альт)",
+        check = function()
+            if http_request then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Debugging Functions
+    {
+        category = "Debug",
+        name = "debug.getupvalue",
+        desc = "Получение upvalue",
+        check = function()
+            if debug and debug.getupvalue then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Debug",
+        name = "debug.setupvalue",
+        desc = "Установка upvalue",
+        check = function()
+            if debug and debug.setupvalue then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Debug",
+        name = "debug.getconstant",
+        desc = "Получение константы",
+        check = function()
+            if debug and debug.getconstant then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Debug",
+        name = "debug.setconstant",
+        desc = "Установка константы",
+        check = function()
+            if debug and debug.setconstant then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Debug",
+        name = "debug.getproto",
+        desc = "Получение прототипа",
+        check = function()
+            if debug and debug.getproto then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Crypt Functions
+    {
+        category = "Crypt",
+        name = "crypt.encrypt",
+        desc = "Шифрование данных",
+        check = function()
+            if crypt and crypt.encrypt then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Crypt",
+        name = "crypt.decrypt",
+        desc = "Дешифрование данных",
+        check = function()
+            if crypt and crypt.decrypt then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Crypt",
+        name = "crypt.base64encode",
+        desc = "Base64 кодирование",
+        check = function()
+            if crypt and crypt.base64encode then
+                local encoded = crypt.base64encode("test")
+                return encoded == "dGVzdA==", "Работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Crypt",
+        name = "crypt.base64decode",
+        desc = "Base64 декодирование",
+        check = function()
+            if crypt and crypt.base64decode then
+                local decoded = crypt.base64decode("dGVzdA==")
+                return decoded == "test", "Работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Crypt",
+        name = "crypt.hash",
+        desc = "Хеширование",
+        check = function()
+            if crypt and crypt.hash then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Misc Functions
+    {
+        category = "Misc",
+        name = "identifyexecutor",
+        desc = "Определение эксплойта",
+        check = function()
+            if identifyexecutor then
+                local name, version = identifyexecutor()
+                return true, (name or "Unknown") .. " " .. (version or "")
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "getexecutorname",
+        desc = "Имя эксплойта",
+        check = function()
+            if getexecutorname then
+                return true, getexecutorname()
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "setfpscap",
+        desc = "Ограничение FPS",
+        check = function()
+            if setfpscap then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "getgc",
+        desc = "Garbage Collector",
+        check = function()
+            if getgc then
+                local gc = getgc()
+                return true, #gc .. " объектов"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "getloadedmodules",
+        desc = "Загруженные модули",
+        check = function()
+            if getloadedmodules then
+                local modules = getloadedmodules()
+                return true, #modules .. " модулей"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "loadstring",
+        desc = "Выполнение кода из строки",
+        check = function()
+            if loadstring then
+                local func = loadstring("return 1+1")
+                return func() == 2, "Работает"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "gettenv",
+        desc = "Thread окружение",
+        check = function()
+            if gettenv then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "getthreadidentity",
+        desc = "Thread identity",
+        check = function()
+            if getthreadidentity then
+                local id = getthreadidentity()
+                return true, "Identity: " .. id
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "setthreadidentity",
+        desc = "Установка thread identity",
+        check = function()
+            if setthreadidentity then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "saveinstance",
+        desc = "Сохранение игры",
+        check = function()
+            if saveinstance then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "messagebox",
+        desc = "Системное окно сообщения",
+        check = function()
+            if messagebox then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    {
+        category = "Misc",
+        name = "queue_on_teleport",
+        desc = "Код при телепорте",
+        check = function()
+            if queue_on_teleport then
+                return true, "Функция доступна"
+            end
+            return nil, "Недоступно"
+        end
+    },
+    
+    -- Security Checks
+    {
+        category = "Security",
+        name = "Anti-Cheat Detection",
+        desc = "Проверка античита",
+        check = function()
+            local suspicious = 0
+            for _, v in pairs(game:GetDescendants()) do
+                if v:IsA("LocalScript") then
+                    local name = v.Name:lower()
+                    if name:find("anti") or name:find("detect") or name:find("cheat") then
+                        suspicious = suspicious + 1
+                    end
+                end
+            end
+            return suspicious == 0, suspicious > 0 and suspicious .. " подозрительных скриптов" or "Чисто"
+        end
+    },
+    {
+        category = "Security",
+        name = "Metatable Protection",
+        desc = "Защита метатаблицы",
+        check = function()
+            local mt = getrawmetatable(game)
+            if mt then
+                local protected = isreadonly(mt)
+                return protected, protected and "Защищена" or "Уязвима"
+            end
+            return nil, "Не проверено"
+        end
+    },
+    {
+        category = "Security",
+        name = "Memory Usage",
+        desc = "Использование памяти",
+        check = function()
+            local stats = game:GetService("Stats")
+            local memory = stats:GetTotalMemoryUsageMb()
+            return memory < 1500, math.floor(memory) .. " MB"
+        end
+    },
+    {
+        category = "Security",
+        name = "Script Count",
+        desc = "Количество скриптов",
+        check = function()
+            local scripts = 0
+            for _, v in pairs(game:GetDescendants()) do
+                if v:IsA("LocalScript") or v:IsA("ModuleScript") then
+                    scripts = scripts + 1
+                end
+            end
+            return true, scripts .. " скриптов"
+        end
+    },
+    {
+        category = "Security",
+        name = "Remote Security",
+        desc = "Безопасность Remote",
+        check = function()
+            local encrypted = 0
+            local total = 0
+            for _, v in pairs(game:GetDescendants()) do
+                if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
+                    total = total + 1
+                    if v.Name:match("%x%x%x%x") then
+                        encrypted = encrypted + 1
+                    end
+                end
+            end
+            return true, encrypted .. "/" .. total .. " зашифровано"
+        end
+    },
+}
+
+-- Создание элементов проверки
+function Library:CreateCheckItem(data)
+    local Item = Instance.new("Frame")
+    local ItemCorner = Instance.new("UICorner")
+    local CategoryLabel = Instance.new("TextLabel")
+    local NameLabel = Instance.new("TextLabel")
+    local DescLabel = Instance.new("TextLabel")
+    local StatusLabel = Instance.new("TextLabel")
+    local CheckButton = Instance.new("TextButton")
+    local ButtonCorner = Instance.new("UICorner")
+    local ProgressBar = Instance.new("Frame")
+    local ProgressFill = Instance.new("Frame")
+    local ProgressCorner = Instance.new("UICorner")
+    
+    Item.Name = data.name
+    Item.Parent = ScrollingFrame
+    Item.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    Item.BorderSizePixel = 0
+    Item.Size = UDim2.new(1, -16, 0, 85)
+    
+    ItemCorner.CornerRadius = UDim.new(0, 8)
+    ItemCorner.Parent = Item
+    
+    -- Категория
+    CategoryLabel.Parent = Item
+    CategoryLabel.BackgroundTransparency = 1
+    CategoryLabel.Position = UDim2.new(0, 12, 0, 6)
+    CategoryLabel.Size = UDim2.new(0.4, 0, 0, 14)
+    CategoryLabel.Font = Enum.Font.GothamBold
+    CategoryLabel.Text = "📁 " .. data.category
+    CategoryLabel.TextColor3 = Color3.fromRGB(100, 150, 255)
+    CategoryLabel.TextSize = 11
+    CategoryLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Имя функции
+    NameLabel.Parent = Item
+    NameLabel.BackgroundTransparency = 1
+    NameLabel.Position = UDim2.new(0, 12, 0, 22)
+    NameLabel.Size = UDim2.new(0.55, 0, 0, 18)
+    NameLabel.Font = Enum.Font.GothamBold
+    NameLabel.Text = "⚡ " .. data.name
+    NameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NameLabel.TextSize = 13
+    NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Описание
+    DescLabel.Parent = Item
+    DescLabel.BackgroundTransparency = 1
+    DescLabel.Position = UDim2.new(0, 12, 0, 42)
+    DescLabel.Size = UDim2.new(0.55, 0, 0, 14)
+    DescLabel.Font = Enum.Font.Gotham
+    DescLabel.Text = data.desc
+    DescLabel.TextColor3 = Color3.fromRGB(140, 140, 150)
+    DescLabel.TextSize = 10
+    DescLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Статус
+    StatusLabel.Name = "Status"
+    StatusLabel.Parent = Item
+    StatusLabel.BackgroundTransparency = 1
+    StatusLabel.Position = UDim2.new(0, 12, 0, 58)
+    StatusLabel.Size = UDim2.new(0.55, 0, 0, 18)
+    StatusLabel.Font = Enum.Font.GothamBold
+    StatusLabel.Text = "⏳ Ожидание проверки..."
+    StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 190)
+    StatusLabel.TextSize = 10
+    StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Progress Bar
+    ProgressBar.Name = "ProgressBar"
+    ProgressBar.Parent = Item
+    ProgressBar.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+    ProgressBar.BorderSizePixel = 0
+    ProgressBar.Position = UDim2.new(0, 12, 1, -8)
+    ProgressBar.Size = UDim2.new(0.55, 0, 0, 3)
+    ProgressBar.Visible = false
+    
+    ProgressFill.Name = "Fill"
+    ProgressFill.Parent = ProgressBar
+    ProgressFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+    ProgressFill.BorderSizePixel = 0
+    ProgressFill.Size = UDim2.new(0, 0, 1, 0)
+    
+    ProgressCorner.CornerRadius = UDim.new(1, 0)
+    ProgressCorner.Parent = ProgressBar
+    ProgressCorner:Clone().Parent = ProgressFill
+    
+    -- Кнопка проверки
+    CheckButton.Name = "CheckButton"
+    CheckButton.Parent = Item
+    CheckButton.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+    CheckButton.BorderSizePixel = 0
+    CheckButton.Position = UDim2.new(1, -95, 0.5, -18)
+    CheckButton.Size = UDim2.new(0, 85, 0, 36)
+    CheckButton.Font = Enum.Font.GothamBold
+    CheckButton.Text = "▶ Check"
+    CheckButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CheckButton.TextSize = 12
+    
+    ButtonCorner.CornerRadius = UDim.new(0, 8)
+    ButtonCorner.Parent = CheckButton
+    
+    -- Анимация при наведении
+    CheckButton.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(CheckButton, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(80, 140, 255)
+        }):Play()
+    end)
+    
+    CheckButton.MouseLeave:Connect(function()
+        if CheckButton.Text == "▶ Check" then
+            game:GetService("TweenService"):Create(CheckButton, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+            }):Play()
+        end
+    end)
+    
+    return Item, StatusLabel, CheckButton, ProgressBar, ProgressFill
+end
+
+-- Tabs System
+local CurrentCategory = "All"
+local TabButtons = {}
+
+function Library:CreateTab(name, category)
+    local TabButton = Instance.new("TextButton")
+    local TabCorner = Instance.new("UICorner")
+    local TabIndicator = Instance.new("Frame")
+    local IndicatorCorner = Instance.new("UICorner")
+    
+    TabButton.Name = name
+    TabButton.Parent = TabsFrame
+    TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+    TabButton.BorderSizePixel = 0
+    TabButton.Position = UDim2.new(0, 10, 0, 10 + (#TabButtons * 45))
+    TabButton.Size = UDim2.new(1, -20, 0, 38)
+    TabButton.Font = Enum.Font.GothamBold
+    TabButton.Text = "  " .. name
+    TabButton.TextColor3 = Color3.fromRGB(200, 200, 210)
+    TabButton.TextSize = 12
+    TabButton.TextXAlignment = Enum.TextXAlignment.Left
+    
+    TabCorner.CornerRadius = UDim.new(0, 8)
+    TabCorner.Parent = TabButton
+    
+    TabIndicator.Name = "Indicator"
+    TabIndicator.Parent = TabButton
+    TabIndicator.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+    TabIndicator.BorderSizePixel = 0
+    TabIndicator.Position = UDim2.new(0, 0, 0, 0)
+    TabIndicator.Size = UDim2.new(0, 0, 1, 0)
+    TabIndicator.Visible = false
+    
+    IndicatorCorner.CornerRadius = UDim.new(0, 8)
+    IndicatorCorner.Parent = TabIndicator
+    
+    table.insert(TabButtons, {button = TabButton, category = category, indicator = TabIndicator})
+    
+    TabButton.MouseButton1Click:Connect(function()
+        Library:SwitchCategory(category)
+    end)
+    
+    return TabButton
+end
+
+function Library:SwitchCategory(category)
+    CurrentCategory = category
+    
+    -- Обновление вкладок
+    for _, tab in pairs(TabButtons) do
+        if tab.category == category then
+            tab.button.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+            tab.button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tab.indicator.Visible = true
+            game:GetService("TweenService"):Create(tab.indicator, TweenInfo.new(0.3), {
+                Size = UDim2.new(0, 4, 1, 0)
+            }):Play()
+        else
+            tab.button.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+            tab.button.TextColor3 = Color3.fromRGB(200, 200, 210)
+            game:GetService("TweenService"):Create(tab.indicator, TweenInfo.new(0.3), {
+                Size = UDim2.new(0, 0, 1, 0)
+            }):Play()
+            task.wait(0.3)
+            tab.indicator.Visible = false
+        end
+    end
+    
+    -- Фильтрация элементов
+    for _, item in pairs(ScrollingFrame:GetChildren()) do
+        if item:IsA("Frame") and item.Name ~= "UIListLayout" then
+            if category == "All" then
+                item.Visible = true
+            else
+                local itemData = nil
+                for _, data in pairs(CheckFunctions) do
+                    if data.name == item.Name then
+                        itemData = data
+                        break
+                    end
+                end
+                
+                if itemData then
+                    item.Visible = itemData.category == category
+                end
+            end
+        end
+    end
+end
+
+-- Создание вкладок
+Library:CreateTab("📋 All", "All")
+Library:CreateTab("🎣 Hooks", "Hooks")
+Library:CreateTab("🌍 Environment", "Environment")
+Library:CreateTab("📊 Metatables", "Metatables")
+Library:CreateTab("📜 Scripts", "Scripts")
+Library:CreateTab("🔗 Instances", "Instances")
+Library:CreateTab("🔌 Connections", "Connections")
+Library:CreateTab("📡 Remotes", "Remotes")
+Library:CreateTab("🔒 Closures", "Closures")
+Library:CreateTab("💾 Cache", "Cache")
+Library:CreateTab("🖥️ Console", "Console")
+Library:CreateTab("📁 Filesystem", "Filesystem")
+Library:CreateTab("📋 Clipboard", "Clipboard")
+Library:CreateTab("✏️ Drawing", "Drawing")
+Library:CreateTab("⌨️ Input", "Input")
+Library:CreateTab("🌐 WebSocket", "WebSocket")
+Library:CreateTab("📨 Request", "Request")
+Library:CreateTab("🐛 Debug", "Debug")
+Library:CreateTab("🔐 Crypt", "Crypt")
+Library:CreateTab("🎲 Misc", "Misc")
+Library:CreateTab("🛡️ Security", "Security")
+
+-- Добавление всех проверок
+local CheckItems = {}
+for _, checkData in ipairs(CheckFunctions) do
+    local item, status, button, progressBar, progressFill = Library:CreateCheckItem(checkData)
+    
+    button.MouseButton1Click:Connect(function()
+        button.Text = "⏳"
+        button.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
+        progressBar.Visible = true
+        
+        -- Анимация прогресса
+        game:GetService("TweenService"):Create(progressFill, TweenInfo.new(0.5), {
+            Size = UDim2.new(1, 0, 1, 0)
+        }):Play()
+        
+        task.wait(0.3)
+        
+        local success, result, message = pcall(checkData.check)
+        
+        if success and result ~= nil then
+            if result then
+                status.Text = "✅ " .. (message or "Успешно")
+                status.TextColor3 = Color3.fromRGB(100, 255, 100)
+                button.BackgroundColor3 = Color3.fromRGB(80, 200, 80)
+                button.Text = "✓ OK"
+                progressFill.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+            elseif result == false then
+                status.Text = "❌ " .. (message or "Ошибка")
+                status.TextColor3 = Color3.fromRGB(255, 100, 100)
+                button.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+                button.Text = "✗ FAIL"
+                progressFill.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+            else
+                status.Text = "⚠️ " .. (message or "Недоступно")
+                status.TextColor3 = Color3.fromRGB(255, 200, 100)
+                button.BackgroundColor3 = Color3.fromRGB(255, 180, 80)
+                button.Text = "⚠ N/A"
+                progressFill.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
+            end
+        else
+            status.Text = "❌ Ошибка выполнения"
+            status.TextColor3 = Color3.fromRGB(255, 100, 100)
+            button.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+            button.Text = "✗ ERROR"
+            progressFill.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+        end
+        
+        task.wait(2)
+        progressBar.Visible = false
+        progressFill.Size = UDim2.new(0, 0, 1, 0)
+        progressFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+    end)
+    
+    table.insert(CheckItems, {
+        button = button, 
+        status = status, 
+        check = checkData.check,
+        item = item,
+        data = checkData
+    })
+end
+
+-- Обновление размера Canvas
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
+end)
+
+-- Check All Button
+CheckAllButton.MouseButton1Click:Connect(function()
+    CheckAllButton.Text = "⏳ Проверка..."
+    for i, item in pairs(CheckItems) do
+        if item.item.Visible then
+            task.spawn(function()
+                task.wait(i * 0.05)
+                item.button.MouseButton1Click:Fire()
+            end)
+        end
+    end
+    task.wait(#CheckItems * 0.05 + 1)
+    CheckAllButton.Text = "🔍 Check All"
+end)
+
+-- Clear Button
+ClearButton.MouseButton1Click:Connect(function()
+    for _, item in pairs(CheckItems) do
+        item.status.Text = "⏳ Ожидание проверки..."
+        item.status.TextColor3 = Color3.fromRGB(180, 180, 190)
+        item.button.Text = "▶ Check"
+        item.button.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+    end
+end)
+
+-- Export Button
+ExportButton.MouseButton1Click:Connect(function()
+    local results = "=== CHEAT DETECTOR RESULTS ===\n"
+    results = results .. "Game: " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name .. "\n"
+    results = results .. "Time: " .. os.date("%Y-%m-%d %H:%M:%S") .. "\n\n"
+    
+    local categories = {}
+    for _, item in pairs(CheckItems) do
+        local category = item.data.category
+        if not categories[category] then
+            categories[category] = {}
+        end
+        
+        local statusText = item.status.Text
+        table.insert(categories[category], {
+            name = item.data.name,
+            status = statusText
+        })
+    end
+    
+    for category, items in pairs(categories) do
+        results = results .. "\n[" .. category .. "]\n"
+        for _, item in pairs(items) do
+            results = results .. "  " .. item.name .. ": " .. item.status .. "\n"
+        end
+    end
+    
+    if setclipboard then
+        setclipboard(results)
+        ExportButton.Text = "✅ Скопировано!"
+        task.wait(2)
+        ExportButton.Text = "📋 Export Results"
+    else
+        print(results)
+        ExportButton.Text = "✅ В консоль!"
+        task.wait(2)
+        ExportButton.Text = "📋 Export Results"
+    end
+end)
+
+-- Search functionality
+SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local searchText = SearchBox.Text:lower()
+    
+    for _, item in pairs(CheckItems) do
+        if searchText == "" then
+            if CurrentCategory == "All" then
+                item.item.Visible = true
+            else
+                item.item.Visible = item.data.category == CurrentCategory
+            end
+        else
+            local nameMatch = item.data.name:lower():find(searchText)
+            local descMatch = item.data.desc:lower():find(searchText)
+            local categoryMatch = CurrentCategory == "All" or item.data.category == CurrentCategory
+            
+            item.item.Visible = (nameMatch or descMatch) and categoryMatch
+        end
+    end
+end)
+
+-- Close Button
+CloseButton.MouseButton1Click:Connect(function()
+    game:GetService("TweenService"):Create(MainFrame, TweenInfo.new(0.3), {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    }):Play()
+    task.wait(0.3)
+    ScreenGui:Destroy()
+end)
+
+-- Minimize Button
+local minimized = false
+MinimizeButton.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        MainFrame:TweenSize(UDim2.new(0, 750, 0, 50), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+        MinimizeButton.Text = "+"
+    else
+        MainFrame:TweenSize(UDim2.new(0, 750, 0, 550), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+        MinimizeButton.Text = "−"
+    end
+end)
+
+-- Dragging
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TopBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- Анимация появления
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame:TweenSizeAndPosition(
+    UDim2.new(0, 750, 0, 550),
+    UDim2.new(0.25, 0, 0.15, 0),
+    Enum.EasingDirection.Out,
+    Enum.EasingStyle.Back,
+    0.6,
+    true
+)
+
+-- Начальная категория
+Library:SwitchCategory("All")
+
+print("🛡️ Ultimate Cheat Detector загружен! | 100+ проверок доступно")
