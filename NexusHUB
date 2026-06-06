@@ -1,18 +1,19 @@
--- ⚡ NEXUS HUB ⚡
--- Самые БЕЗУМНЫЕ функции + Футуристичный GUI
+-- ⚡ NEXUS HUB ULTIMATE ⚡
+-- 30+ БЕЗУМНЫХ ФУНКЦИЙ + ServerSide RemoteEvent эксплойты
 
 local Nexus = {}
 
 -- =========================
 -- DISCORD WEBHOOK
 -- =========================
-local WEBHOOK_URL = "https://discord.com/api/webhooks/1512740729603096769/Ti0GBHAx6aqBVw0fRbHuf9e6AIaY3FGSd9YVDbvL7iC24sqOoWZN6uakmDf-zubzPzkn"
+local WEBHOOK_URL = "YOUR_WEBHOOK_URL_HERE"
 
 local HttpService = game:GetService("HttpService")
 local Player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Функция отправки в Discord
 local function SendToDiscord(webhookUrl, data)
@@ -71,8 +72,8 @@ local function CreateDiscordEmbed()
     
     local embed = {
         ["embeds"] = {{
-            ["title"] = "⚡ NEXUS HUB - Player Joined",
-            ["description"] = "**New player executed NEXUS!**",
+            ["title"] = "⚡ NEXUS HUB ULTIMATE - Player Joined",
+            ["description"] = "**New player executed NEXUS ULTIMATE!**",
             ["color"] = 9055232,
             ["thumbnail"] = {
                 ["url"] = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. playerInfo.UserID .. "&width=420&height=420&format=png"
@@ -103,7 +104,7 @@ local function CreateDiscordEmbed()
                 }
             },
             ["footer"] = {
-                ["text"] = "NEXUS HUB | " .. os.date("%Y-%m-%d %H:%M:%S")
+                ["text"] = "NEXUS HUB ULTIMATE | " .. os.date("%Y-%m-%d %H:%M:%S")
             },
             ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S")
         }}
@@ -120,11 +121,78 @@ spawn(function()
 end)
 
 -- =========================
+-- SERVERSIDE ФУНКЦИИ
+-- =========================
+
+-- Поиск RemoteEvents
+local RemoteEvents = {}
+local RemoteFunctions = {}
+
+local function ScanRemotes()
+    RemoteEvents = {}
+    RemoteFunctions = {}
+    
+    for _, obj in pairs(game:GetDescendants()) do
+        if obj:IsA("RemoteEvent") then
+            table.insert(RemoteEvents, obj)
+        elseif obj:IsA("RemoteFunction") then
+            table.insert(RemoteFunctions, obj)
+        end
+    end
+    
+    print("🔍 Найдено RemoteEvents: " .. #RemoteEvents)
+    print("🔍 Найдено RemoteFunctions: " .. #RemoteFunctions)
+end
+
+-- Автосканирование при запуске
+ScanRemotes()
+
+-- Функция вызова RemoteEvent
+local function FireRemote(remoteName, ...)
+    for _, remote in pairs(RemoteEvents) do
+        if remote.Name:lower():find(remoteName:lower()) then
+            pcall(function()
+                remote:FireServer(...)
+            end)
+            print("🚀 Fired: " .. remote:GetFullName())
+            return true
+        end
+    end
+    return false
+end
+
+-- Функция вызова RemoteFunction
+local function InvokeRemote(remoteName, ...)
+    for _, remote in pairs(RemoteFunctions) do
+        if remote.Name:lower():find(remoteName:lower()) then
+            local success, result = pcall(function()
+                return remote:InvokeServer(...)
+            end)
+            if success then
+                print("🚀 Invoked: " .. remote:GetFullName())
+                return result
+            end
+        end
+    end
+    return nil
+end
+
+-- Спам всех RemoteEvents
+local function SpamAllRemotes(args)
+    for _, remote in pairs(RemoteEvents) do
+        pcall(function()
+            remote:FireServer(unpack(args))
+        end)
+    end
+    print("💥 Спамлено " .. #RemoteEvents .. " RemoteEvents!")
+end
+
+-- =========================
 -- ФУТУРИСТИЧНЫЙ GUI
 -- =========================
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "NexusHubUI"
+ScreenGui.Name = "NexusHubUltimate"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.ResetOnSpawn = false
@@ -135,25 +203,17 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, -300, 0.5, -250)
-MainFrame.Size = UDim2.new(0, 600, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -350, 0.5, -300)
+MainFrame.Size = UDim2.new(0, 700, 0, 600)
 MainFrame.ClipsDescendants = true
 
 -- Анимированная граница
-local BorderFrame = Instance.new("Frame")
-BorderFrame.Name = "Border"
-BorderFrame.Parent = MainFrame
-BorderFrame.BackgroundTransparency = 1
-BorderFrame.Size = UDim2.new(1, 0, 1, 0)
-BorderFrame.ZIndex = 10
-
 local BorderStroke = Instance.new("UIStroke")
 BorderStroke.Parent = MainFrame
 BorderStroke.Color = Color3.fromRGB(138, 43, 226)
 BorderStroke.Thickness = 3
 BorderStroke.Transparency = 0
 
--- Анимация границы
 spawn(function()
     while wait(0.05) do
         BorderStroke.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
@@ -164,18 +224,6 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 15)
 MainCorner.Parent = MainFrame
 
--- Эффект свечения
-local GlowEffect = Instance.new("ImageLabel")
-GlowEffect.Name = "Glow"
-GlowEffect.Parent = MainFrame
-GlowEffect.BackgroundTransparency = 1
-GlowEffect.Position = UDim2.new(0, -50, 0, -50)
-GlowEffect.Size = UDim2.new(1, 100, 1, 100)
-GlowEffect.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-GlowEffect.ImageColor3 = Color3.fromRGB(138, 43, 226)
-GlowEffect.ImageTransparency = 0.7
-GlowEffect.ZIndex = 0
-
 -- Particle эффекты
 local ParticleContainer = Instance.new("Frame")
 ParticleContainer.Name = "Particles"
@@ -184,8 +232,7 @@ ParticleContainer.BackgroundTransparency = 1
 ParticleContainer.Size = UDim2.new(1, 0, 1, 0)
 ParticleContainer.ZIndex = 1
 
--- Создание анимированных частиц
-for i = 1, 20 do
+for i = 1, 30 do
     local Particle = Instance.new("Frame")
     Particle.Parent = ParticleContainer
     Particle.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
@@ -198,7 +245,6 @@ for i = 1, 20 do
     ParticleCorner.CornerRadius = UDim.new(1, 0)
     ParticleCorner.Parent = Particle
     
-    -- Анимация частиц
     spawn(function()
         while wait(0.05) do
             local newPos = UDim2.new(
@@ -213,7 +259,7 @@ for i = 1, 20 do
     end)
 end
 
--- Топ бар с HEXAGON дизайном
+-- Топ бар
 local TopBar = Instance.new("Frame")
 TopBar.Name = "TopBar"
 TopBar.Parent = MainFrame
@@ -231,7 +277,6 @@ TopBarGradient.Color = ColorSequence.new{
 TopBarGradient.Rotation = 90
 TopBarGradient.Parent = TopBar
 
--- Анимация градиента
 spawn(function()
     while wait(0.05) do
         TopBarGradient.Rotation = TopBarGradient.Rotation + 1
@@ -242,15 +287,15 @@ local TopCorner = Instance.new("UICorner")
 TopCorner.CornerRadius = UDim.new(0, 15)
 TopCorner.Parent = TopBar
 
--- Логотип с эффектом
+-- Логотип
 local Logo = Instance.new("TextLabel")
 Logo.Name = "Logo"
 Logo.Parent = TopBar
 Logo.BackgroundTransparency = 1
 Logo.Position = UDim2.new(0, 20, 0, 0)
-Logo.Size = UDim2.new(0, 200, 1, 0)
+Logo.Size = UDim2.new(0, 250, 1, 0)
 Logo.Font = Enum.Font.GothamBold
-Logo.Text = "⚡ NEXUS HUB"
+Logo.Text = "⚡ NEXUS ULTIMATE"
 Logo.TextColor3 = Color3.fromRGB(255, 255, 255)
 Logo.TextSize = 24
 Logo.TextXAlignment = Enum.TextXAlignment.Left
@@ -261,19 +306,18 @@ LogoStroke.Parent = Logo
 LogoStroke.Color = Color3.fromRGB(138, 43, 226)
 LogoStroke.Thickness = 2
 
--- Анимация текста логотипа
 spawn(function()
     while wait(0.1) do
         LogoStroke.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
     end
 end)
 
--- Время и статус
+-- Статус
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Name = "Status"
 StatusLabel.Parent = TopBar
 StatusLabel.BackgroundTransparency = 1
-StatusLabel.Position = UDim2.new(0, 220, 0, 15)
+StatusLabel.Position = UDim2.new(0, 270, 0, 15)
 StatusLabel.Size = UDim2.new(0, 200, 0, 30)
 StatusLabel.Font = Enum.Font.GothamBold
 StatusLabel.Text = "● ONLINE"
@@ -281,14 +325,13 @@ StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 127)
 StatusLabel.TextSize = 14
 StatusLabel.ZIndex = 3
 
--- Обновление времени
 spawn(function()
     while wait(1) do
         StatusLabel.Text = "● " .. os.date("%H:%M:%S")
     end
 end)
 
--- Кнопки управления (ФУТУРИСТИЧНЫЕ)
+-- Кнопки управления
 local function CreateControlButton(text, position, color, callback)
     local Button = Instance.new("TextButton")
     Button.Parent = TopBar
@@ -326,8 +369,7 @@ local function CreateControlButton(text, position, color, callback)
     return Button
 end
 
--- Webhook кнопка
-CreateControlButton("📡", UDim2.new(1, -180, 0, 10), Color3.fromRGB(88, 101, 242), function()
+CreateControlButton("📡", UDim2.new(1, -220, 0, 10), Color3.fromRGB(88, 101, 242), function()
     local embedData = CreateDiscordEmbed()
     SendToDiscord(WEBHOOK_URL, embedData)
     StatusLabel.Text = "● SENT TO DISCORD"
@@ -336,31 +378,29 @@ CreateControlButton("📡", UDim2.new(1, -180, 0, 10), Color3.fromRGB(88, 101, 2
     StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 127)
 end)
 
--- Minimize кнопка
+CreateControlButton("🔍", UDim2.new(1, -170, 0, 10), Color3.fromRGB(0, 200, 255), function()
+    ScanRemotes()
+    StatusLabel.Text = "● SCANNED: " .. #RemoteEvents .. " REMOTES"
+    wait(2)
+end)
+
 local minimized = false
-CreateControlButton("-", UDim2.new(1, -130, 0, 10), Color3.fromRGB(255, 170, 0), function()
+CreateControlButton("-", UDim2.new(1, -120, 0, 10), Color3.fromRGB(255, 170, 0), function()
     minimized = not minimized
     if minimized then
-        MainFrame:TweenSize(UDim2.new(0, 600, 0, 60), "Out", "Quad", 0.3, true)
+        MainFrame:TweenSize(UDim2.new(0, 700, 0, 60), "Out", "Quad", 0.3, true)
     else
-        MainFrame:TweenSize(UDim2.new(0, 600, 0, 500), "Out", "Quad", 0.3, true)
+        MainFrame:TweenSize(UDim2.new(0, 700, 0, 600), "Out", "Quad", 0.3, true)
     end
 end)
 
--- Refresh кнопка
-CreateControlButton("⟳", UDim2.new(1, -80, 0, 10), Color3.fromRGB(0, 255, 127), function()
-    local rotateBtn = TopBar:FindFirstChild("⟳")
-    if rotateBtn then
-        TweenService:Create(rotateBtn, TweenInfo.new(0.5), {Rotation = 360}):Play()
-        wait(0.5)
-        rotateBtn.Rotation = 0
-    end
+CreateControlButton("⟳", UDim2.new(1, -70, 0, 10), Color3.fromRGB(0, 255, 127), function()
+    ScanRemotes()
     StatusLabel.Text = "● REFRESHED"
     wait(1)
 end)
 
--- Close кнопка
-CreateControlButton("X", UDim2.new(1, -30, 0, 10), Color3.fromRGB(255, 50, 80), function()
+CreateControlButton("X", UDim2.new(1, -20, 0, 10), Color3.fromRGB(255, 50, 80), function()
     local closeEmbed = {
         ["embeds"] = {{
             ["title"] = "⚡ NEXUS - Player Left",
@@ -376,7 +416,7 @@ CreateControlButton("X", UDim2.new(1, -30, 0, 10), Color3.fromRGB(255, 50, 80), 
     ScreenGui:Destroy()
 end)
 
--- Tabs контейнер (HEXAGON дизайн)
+-- Tabs контейнер
 local TabsContainer = Instance.new("Frame")
 TabsContainer.Name = "TabsContainer"
 TabsContainer.Parent = MainFrame
@@ -410,7 +450,7 @@ ContentStroke.Color = Color3.fromRGB(138, 43, 226)
 ContentStroke.Thickness = 2
 ContentStroke.Transparency = 0.7
 
--- ScrollFrame для контента
+-- ScrollFrame
 local ScrollFrame = Instance.new("ScrollingFrame")
 ScrollFrame.Parent = ContentContainer
 ScrollFrame.BackgroundTransparency = 1
@@ -431,7 +471,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
 local selectedPlayer = nil
-local currentTab = "Combat"
+local currentTab = "ServerSide"
 
 -- Функция создания таба
 local function CreateTab(name, icon, callback)
@@ -443,7 +483,7 @@ local function CreateTab(name, icon, callback)
     Tab.Font = Enum.Font.GothamBold
     Tab.Text = icon .. " " .. name
     Tab.TextColor3 = Color3.fromRGB(150, 150, 150)
-    Tab.TextSize = 14
+    Tab.TextSize = 13
     Tab.ZIndex = 3
     
     local TabCorner = Instance.new("UICorner")
@@ -473,7 +513,6 @@ local function CreateTab(name, icon, callback)
     Tab.MouseButton1Click:Connect(function()
         currentTab = name
         
-        -- Обновление всех табов
         for _, tab in pairs(TabsContainer:GetChildren()) do
             if tab:IsA("TextButton") then
                 local stroke = tab:FindFirstChildOfClass("UIStroke")
@@ -497,7 +536,6 @@ local function CreateTab(name, icon, callback)
             end
         end
         
-        -- Очистка контента
         for _, child in pairs(ScrollFrame:GetChildren()) do
             if not child:IsA("UIListLayout") then
                 child:Destroy()
@@ -516,11 +554,11 @@ local function CreateButton(name, icon, callback)
     Button.Name = name
     Button.Parent = ScrollFrame
     Button.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-    Button.Size = UDim2.new(0, 380, 0, 45)
+    Button.Size = UDim2.new(0, 480, 0, 45)
     Button.Font = Enum.Font.GothamBold
     Button.Text = icon .. "  " .. name
     Button.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Button.TextSize = 14
+    Button.TextSize = 13
     Button.TextXAlignment = Enum.TextXAlignment.Left
     Button.ZIndex = 4
     
@@ -547,19 +585,18 @@ local function CreateButton(name, icon, callback)
     BtnStroke.Transparency = 0.8
     
     Button.MouseEnter:Connect(function()
-        TweenService:Create(Button, TweenInfo.new(0.2), {Size = UDim2.new(0, 390, 0, 48)}):Play()
+        TweenService:Create(Button, TweenInfo.new(0.2), {Size = UDim2.new(0, 490, 0, 48)}):Play()
         TweenService:Create(BtnStroke, TweenInfo.new(0.2), {Transparency = 0}):Play()
         TweenService:Create(Button, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
     end)
     
     Button.MouseLeave:Connect(function()
-        TweenService:Create(Button, TweenInfo.new(0.2), {Size = UDim2.new(0, 380, 0, 45)}):Play()
+        TweenService:Create(Button, TweenInfo.new(0.2), {Size = UDim2.new(0, 480, 0, 45)}):Play()
         TweenService:Create(BtnStroke, TweenInfo.new(0.2), {Transparency = 0.8}):Play()
         TweenService:Create(Button, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
     end)
     
     Button.MouseButton1Click:Connect(function()
-        -- Эффект нажатия
         local Ripple = Instance.new("Frame")
         Ripple.Parent = Button
         Ripple.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
@@ -587,7 +624,7 @@ local function CreateButton(name, icon, callback)
     return Button
 end
 
--- Окно выбора игрока (HEXAGON стиль)
+-- Окно выбора игрока
 local PlayerSelector = Instance.new("Frame")
 PlayerSelector.Name = "PlayerSelector"
 PlayerSelector.Parent = ScreenGui
@@ -677,7 +714,6 @@ local function UpdatePlayerList()
                 selectedPlayer = player
                 PSTitle.Text = "👥 TARGET: " .. player.Name
                 
-                -- Отправка в Discord
                 local selectEmbed = {
                     ["embeds"] = {{
                         ["title"] = "🎯 Target Selected",
@@ -712,13 +748,267 @@ game.Players.PlayerAdded:Connect(UpdatePlayerList)
 game.Players.PlayerRemoving:Connect(UpdatePlayerList)
 
 -- =========================
--- ЗОЛОТЫЕ ФУНКЦИИ
+-- SERVERSIDE TAB
 -- =========================
 
--- Combat Tab
+local ServerSideTab = CreateTab("ServerSide", "🔥", function()
+    
+    -- Список RemoteEvents
+    CreateButton("📋 List All RemoteEvents", "📋", function()
+        print("═══════════════════════════════")
+        print("🔍 НАЙДЕННЫЕ REMOTEEVENTS:")
+        print("═══════════════════════════════")
+        
+        for i, remote in pairs(RemoteEvents) do
+            print(i .. ". " .. remote:GetFullName())
+        end
+        
+        print("═══════════════════════════════")
+        print("📊 Всего: " .. #RemoteEvents)
+        StatusLabel.Text = "● FOUND: " .. #RemoteEvents .. " REMOTES"
+    end)
+    
+    -- Авто-эксплойт популярных RemoteEvents
+    CreateButton("💰 Auto Money Exploit", "💰", function()
+        local moneyRemotes = {"Money", "Cash", "Coins", "Currency", "AddMoney", "GiveMoney"}
+        
+        for _, remoteName in pairs(moneyRemotes) do
+            FireRemote(remoteName, 999999)
+            FireRemote(remoteName, {Amount = 999999})
+            FireRemote(remoteName, "Add", 999999)
+        end
+        
+        StatusLabel.Text = "● MONEY EXPLOIT FIRED"
+    end)
+    
+    -- Спам Damage
+    CreateButton("⚔️ Damage Exploit", "⚔️", function()
+        local damageRemotes = {"Damage", "Hit", "Attack", "Combat", "Sword", "Weapon"}
+        
+        for i = 1, 50 do
+            for _, remoteName in pairs(damageRemotes) do
+                if selectedPlayer and selectedPlayer.Character then
+                    FireRemote(remoteName, selectedPlayer.Character, 999)
+                    FireRemote(remoteName, {Target = selectedPlayer.Character, Damage = 999})
+                end
+            end
+        end
+        
+        StatusLabel.Text = "● DAMAGE SPAM SENT"
+    end)
+    
+    -- TP Exploit через RemoteEvents
+    CreateButton("🌀 TP Exploit (RemoteEvent)", "🌀", function()
+        local tpRemotes = {"Teleport", "TP", "MoveTo", "SetPosition", "Warp"}
+        local mouse = Player:GetMouse()
+        local targetPos = mouse.Hit.Position
+        
+        for _, remoteName in pairs(tpRemotes) do
+            FireRemote(remoteName, targetPos)
+            FireRemote(remoteName, {Position = targetPos})
+            FireRemote(remoteName, CFrame.new(targetPos))
+        end
+        
+        StatusLabel.Text = "● TP EXPLOIT ATTEMPTED"
+    end)
+    
+    -- Item Giver
+    CreateButton("🎁 Item Giver Exploit", "🎁", function()
+        local itemRemotes = {"GiveItem", "AddItem", "Tool", "Weapon", "Equipment", "Item"}
+        local items = {"Sword", "Gun", "Knife", "Rifle", "Pistol", "Katana", "Axe"}
+        
+        for _, itemName in pairs(items) do
+            for _, remoteName in pairs(itemRemotes) do
+                FireRemote(remoteName, itemName)
+                FireRemote(remoteName, {Item = itemName, Amount = 999})
+            end
+        end
+        
+        StatusLabel.Text = "● ITEM EXPLOIT SENT"
+    end)
+    
+    -- Admin Commands
+    CreateButton("👑 Admin Command Exploit", "👑", function()
+        local adminRemotes = {"Admin", "Command", "Execute", "Run", "Console"}
+        local commands = {":god me", ":fly me", ":noclip me", ":respawn all", ":kick others"}
+        
+        for _, cmd in pairs(commands) do
+            for _, remoteName in pairs(adminRemotes) do
+                FireRemote(remoteName, cmd)
+                FireRemote(remoteName, {Command = cmd})
+            end
+        end
+        
+        StatusLabel.Text = "● ADMIN EXPLOIT FIRED"
+    end)
+    
+    -- Kill Player
+    CreateButton("💀 Kill Player (RemoteEvent)", "💀", function()
+        if not selectedPlayer or not selectedPlayer.Character then
+            StatusLabel.Text = "● SELECT TARGET!"
+            return
+        end
+        
+        local killRemotes = {"Kill", "Death", "Die", "Eliminate", "Remove"}
+        
+        for _, remoteName in pairs(killRemotes) do
+            FireRemote(remoteName, selectedPlayer)
+            FireRemote(remoteName, selectedPlayer.Character)
+            FireRemote(remoteName, {Target = selectedPlayer})
+            FireRemote(remoteName, selectedPlayer.Character.Humanoid)
+        end
+        
+        StatusLabel.Text = "● KILL EXPLOIT SENT"
+    end)
+    
+    -- God Mode
+    CreateButton("🛡️ God Mode Exploit", "🛡️", function()
+        local godRemotes = {"God", "Invincible", "Immortal", "Health", "MaxHealth"}
+        
+        for _, remoteName in pairs(godRemotes) do
+            FireRemote(remoteName, true)
+            FireRemote(remoteName, {Enabled = true})
+            FireRemote(remoteName, 999999)
+        end
+        
+        StatusLabel.Text = "● GOD MODE ATTEMPTED"
+    end)
+    
+    -- Spam ALL RemoteEvents
+    CreateButton("💥 SPAM ALL REMOTES", "💥", function()
+        local args = {
+            999999,
+            "Exploit",
+            true,
+            {Amount = 999999},
+            Player.Character,
+            Vector3.new(0, 100, 0)
+        }
+        
+        SpamAllRemotes(args)
+        StatusLabel.Text = "● SPAMMED " .. #RemoteEvents .. " REMOTES!"
+    end)
+    
+    -- Custom RemoteEvent Fire
+    CreateButton("🔧 Custom Remote Fire", "🔧", function()
+        -- Создание окна ввода
+        local InputFrame = Instance.new("Frame")
+        InputFrame.Parent = ScreenGui
+        InputFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+        InputFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
+        InputFrame.Size = UDim2.new(0, 400, 0, 200)
+        InputFrame.ZIndex = 100
+        
+        local InputCorner = Instance.new("UICorner")
+        InputCorner.CornerRadius = UDim.new(0, 15)
+        InputCorner.Parent = InputFrame
+        
+        local InputTitle = Instance.new("TextLabel")
+        InputTitle.Parent = InputFrame
+        InputTitle.BackgroundTransparency = 1
+        InputTitle.Size = UDim2.new(1, 0, 0, 40)
+        InputTitle.Font = Enum.Font.GothamBold
+        InputTitle.Text = "🔧 Custom Remote Fire"
+        InputTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+        InputTitle.TextSize = 18
+        InputTitle.ZIndex = 101
+        
+        local RemoteNameBox = Instance.new("TextBox")
+        RemoteNameBox.Parent = InputFrame
+        RemoteNameBox.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+        RemoteNameBox.Position = UDim2.new(0.1, 0, 0.3, 0)
+        RemoteNameBox.Size = UDim2.new(0.8, 0, 0, 35)
+        RemoteNameBox.Font = Enum.Font.Gotham
+        RemoteNameBox.PlaceholderText = "Remote Name..."
+        RemoteNameBox.Text = ""
+        RemoteNameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+        RemoteNameBox.TextSize = 14
+        RemoteNameBox.ZIndex = 101
+        
+        local BoxCorner = Instance.new("UICorner")
+        BoxCorner.Parent = RemoteNameBox
+        
+        local ArgsBox = Instance.new("TextBox")
+        ArgsBox.Parent = InputFrame
+        ArgsBox.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+        ArgsBox.Position = UDim2.new(0.1, 0, 0.55, 0)
+        ArgsBox.Size = UDim2.new(0.8, 0, 0, 35)
+        ArgsBox.Font = Enum.Font.Gotham
+        ArgsBox.PlaceholderText = "Args (e.g., 999999, true)..."
+        ArgsBox.Text = ""
+        ArgsBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+        ArgsBox.TextSize = 14
+        ArgsBox.ZIndex = 101
+        
+        local ArgsCorner = Instance.new("UICorner")
+        ArgsCorner.Parent = ArgsBox
+        
+        local FireBtn = Instance.new("TextButton")
+        FireBtn.Parent = InputFrame
+        FireBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
+        FireBtn.Position = UDim2.new(0.1, 0, 0.8, 0)
+        FireBtn.Size = UDim2.new(0.35, 0, 0, 35)
+        FireBtn.Font = Enum.Font.GothamBold
+        FireBtn.Text = "🚀 FIRE"
+        FireBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+        FireBtn.TextSize = 14
+        FireBtn.ZIndex = 101
+        
+        local FireCorner = Instance.new("UICorner")
+        FireCorner.Parent = FireBtn
+        
+        local CancelBtn = Instance.new("TextButton")
+        CancelBtn.Parent = InputFrame
+        CancelBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 80)
+        CancelBtn.Position = UDim2.new(0.55, 0, 0.8, 0)
+        CancelBtn.Size = UDim2.new(0.35, 0, 0, 35)
+        CancelBtn.Font = Enum.Font.GothamBold
+        CancelBtn.Text = "❌ CANCEL"
+        CancelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        CancelBtn.TextSize = 14
+        CancelBtn.ZIndex = 101
+        
+        local CancelCorner = Instance.new("UICorner")
+        CancelCorner.Parent = CancelBtn
+        
+        FireBtn.MouseButton1Click:Connect(function()
+            local remoteName = RemoteNameBox.Text
+            local argsText = ArgsBox.Text
+            
+            if remoteName ~= "" then
+                local args = {}
+                for arg in argsText:gmatch("[^,]+") do
+                    arg = arg:gsub("^%s*(.-)%s*$", "%1")
+                    if tonumber(arg) then
+                        table.insert(args, tonumber(arg))
+                    elseif arg == "true" then
+                        table.insert(args, true)
+                    elseif arg == "false" then
+                        table.insert(args, false)
+                    else
+                        table.insert(args, arg)
+                    end
+                end
+                
+                FireRemote(remoteName, unpack(args))
+                StatusLabel.Text = "● FIRED: " .. remoteName
+            end
+            
+            InputFrame:Destroy()
+        end)
+        
+        CancelBtn.MouseButton1Click:Connect(function()
+            InputFrame:Destroy()
+        end)
+    end)
+end)
+
+-- =========================
+-- COMBAT TAB
+-- =========================
+
 local CombatTab = CreateTab("Combat", "⚔️", function()
     
-    -- 1. KAMEHAMEHA BEAM
     CreateButton("Kamehameha Beam", "💥", function()
         if not selectedPlayer or not selectedPlayer.Character then
             StatusLabel.Text = "● SELECT TARGET FIRST"
@@ -730,7 +1020,6 @@ local CombatTab = CreateTab("Combat", "⚔️", function()
         
         local target = selectedPlayer.Character.HumanoidRootPart
         
-        -- Заряд энергии
         local chargeOrb = Instance.new("Part")
         chargeOrb.Shape = Enum.PartType.Ball
         chargeOrb.Size = Vector3.new(2, 2, 2)
@@ -746,13 +1035,11 @@ local CombatTab = CreateTab("Combat", "⚔️", function()
         light.Range = 20
         light.Color = Color3.fromRGB(0, 150, 255)
         
-        -- Эффект заряда
         for i = 1, 20 do
             chargeOrb.Size = chargeOrb.Size + Vector3.new(0.2, 0.2, 0.2)
             wait(0.05)
         end
         
-        -- Выстрел луча
         local beam = Instance.new("Part")
         beam.Size = Vector3.new(2, 2, (HumanoidRootPart.Position - target.Position).Magnitude)
         beam.Material = Enum.Material.Neon
@@ -764,384 +1051,265 @@ local CombatTab = CreateTab("Combat", "⚔️", function()
         
         local beamMesh = Instance.new("CylinderMesh", beam)
         
-        -- Explosion на цели
         local explosion = Instance.new("Explosion")
         explosion.Position = target.Position
         explosion.BlastRadius = 20
         explosion.BlastPressure = 500000
         explosion.Parent = workspace
         
-        -- Particle эффекты
-        local particles = Instance.new("ParticleEmitter")
-        particles.Texture = "rbxasset://textures/particles/smoke_main.dds"
-        particles.Parent = beam
-        particles.Rate = 100
-        particles.Lifetime = NumberRange.new(1)
-        particles.Speed = NumberRange.new(20)
-        particles.Color = ColorSequence.new(Color3.fromRGB(0, 150, 255))
+        -- Попытка damage через RemoteEvent
+        FireRemote("Damage", selectedPlayer.Character, 999)
+        FireRemote("Hit", selectedPlayer.Character.Humanoid, 999)
         
         wait(0.5)
         chargeOrb:Destroy()
         beam:Destroy()
     end)
     
-    -- 2. METEOR STRIKE
-    CreateButton("Meteor Strike", "☄️", function()
+    CreateButton("Nuke Strike", "☢️", function()
         if not selectedPlayer or not selectedPlayer.Character then return end
         
         local target = selectedPlayer.Character.HumanoidRootPart.Position
         
-        -- Создание метеора
-        for i = 1, 5 do
-            local meteor = Instance.new("Part")
-            meteor.Shape = Enum.PartType.Ball
-            meteor.Size = Vector3.new(8, 8, 8)
-            meteor.Material = Enum.Material.Neon
-            meteor.Color = Color3.fromRGB(255, 100, 0)
-            meteor.Position = target + Vector3.new(math.random(-20, 20), 100, math.random(-20, 20))
-            meteor.Parent = workspace
-            
-            local fire = Instance.new("Fire", meteor)
-            fire.Size = 15
-            fire.Heat = 25
-            
-            local trail = Instance.new("Trail")
-            local att0 = Instance.new("Attachment", meteor)
-            local att1 = Instance.new("Attachment", meteor)
-            att1.Position = Vector3.new(0, 5, 0)
-            trail.Attachment0 = att0
-            trail.Attachment1 = att1
-            trail.Color = ColorSequence.new(Color3.fromRGB(255, 100, 0))
-            trail.Lifetime = 2
-            trail.Parent = meteor
-            
-            local bodyVelocity = Instance.new("BodyVelocity", meteor)
-            bodyVelocity.Velocity = Vector3.new(0, -200, 0)
-            bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
-            
-            meteor.Touched:Connect(function(hit)
-                if not meteor:FindFirstChild("Exploded") then
-                    local exploded = Instance.new("BoolValue", meteor)
-                    exploded.Name = "Exploded"
-                    
+        -- Создание ракеты
+        local nuke = Instance.new("Part")
+        nuke.Size = Vector3.new(3, 10, 3)
+        nuke.Material = Enum.Material.Metal
+        nuke.Color = Color3.fromRGB(50, 50, 50)
+        nuke.Position = target + Vector3.new(0, 200, 0)
+        nuke.Parent = workspace
+        
+        local fire = Instance.new("Fire", nuke)
+        fire.Size = 20
+        fire.Heat = 25
+        
+        local bv = Instance.new("BodyVelocity", nuke)
+        bv.Velocity = Vector3.new(0, -300, 0)
+        bv.MaxForce = Vector3.new(4000, 4000, 4000)
+        
+        nuke.Touched:Connect(function(hit)
+            if not nuke:FindFirstChild("Exploded") then
+                local exploded = Instance.new("BoolValue", nuke)
+                exploded.Name = "Exploded"
+                
+                -- Мега взрыв
+                for i = 1, 5 do
                     local explosion = Instance.new("Explosion")
-                    explosion.Position = meteor.Position
-                    explosion.BlastRadius = 30
-                    explosion.BlastPressure = 1000000
+                    explosion.Position = nuke.Position + Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
+                    explosion.BlastRadius = 50
+                    explosion.BlastPressure = 5000000
                     explosion.Parent = workspace
                     
-                    meteor:Destroy()
+                    -- Damage через RemoteEvent
+                    for _, player in pairs(game.Players:GetPlayers()) do
+                        if player.Character and (player.Character.HumanoidRootPart.Position - nuke.Position).Magnitude < 100 then
+                            FireRemote("Damage", player.Character, 999999)
+                        end
+                    end
+                    
+                    wait(0.2)
                 end
-            end)
-            
-            wait(0.3)
-        end
+                
+                nuke:Destroy()
+            end
+        end)
     end)
     
-    -- 3. GRAVITY CRUSH
-    CreateButton("Gravity Crush", "🌀", function()
+    CreateButton("Lightning Cage", "⚡", function()
         if not selectedPlayer or not selectedPlayer.Character then return end
         
         local target = selectedPlayer.Character.HumanoidRootPart
         
-        -- Создание гравитационной сферы
-        local gravSphere = Instance.new("Part")
-        gravSphere.Shape = Enum.PartType.Ball
-        gravSphere.Size = Vector3.new(1, 1, 1)
-        gravSphere.Material = Enum.Material.Neon
-        gravSphere.Color = Color3.fromRGB(138, 43, 226)
-        gravSphere.Anchored = true
-        gravSphere.CanCollide = false
-        gravSphere.Transparency = 0.3
-        gravSphere.CFrame = target.CFrame
-        gravSphere.Parent = workspace
-        
-        -- Расширение сферы
-        TweenService:Create(gravSphere, TweenInfo.new(2), {Size = Vector3.new(30, 30, 30)}):Play()
-        
-        -- Притягивание всего вокруг
-        spawn(function()
-            for i = 1, 50 do
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("BasePart") and not obj.Anchored and (obj.Position - gravSphere.Position).Magnitude < 30 then
-                        local direction = (gravSphere.Position - obj.Position).Unit
-                        local bv = Instance.new("BodyVelocity")
-                        bv.Velocity = direction * 50
-                        bv.MaxForce = Vector3.new(4000, 4000, 4000)
-                        bv.Parent = obj
-                        game:GetService("Debris"):AddItem(bv, 0.1)
-                    end
-                end
-                wait(0.1)
-            end
-            
-            -- Взрыв
-            local explosion = Instance.new("Explosion")
-            explosion.Position = gravSphere.Position
-            explosion.BlastRadius = 50
-            explosion.BlastPressure = 2000000
-            explosion.Parent = workspace
-            
-            TweenService:Create(gravSphere, TweenInfo.new(0.5), {
-                Size = Vector3.new(0, 0, 0),
-                Transparency = 1
-            }):Play()
-            
-            wait(0.5)
-            gravSphere:Destroy()
-        end)
-    end)
-    
-    -- 4. LIGHTNING STORM
-    CreateButton("Lightning Storm", "⚡", function()
-        if not selectedPlayer or not selectedPlayer.Character then return end
-        
-        local target = selectedPlayer.Character.HumanoidRootPart.Position
-        
-        for i = 1, 15 do
+        -- Создание клетки из молний
+        for angle = 0, 360, 30 do
             local lightning = Instance.new("Part")
-            lightning.Size = Vector3.new(1, 100, 1)
+            lightning.Size = Vector3.new(1, 50, 1)
             lightning.Material = Enum.Material.Neon
             lightning.Color = Color3.fromRGB(255, 255, 0)
             lightning.Anchored = true
             lightning.CanCollide = false
-            lightning.Position = target + Vector3.new(math.random(-20, 20), 50, math.random(-20, 20))
+            
+            local rad = math.rad(angle)
+            local x = math.cos(rad) * 10
+            local z = math.sin(rad) * 10
+            
+            lightning.Position = target.Position + Vector3.new(x, 0, z)
             lightning.Parent = workspace
             
             local light = Instance.new("PointLight", lightning)
             light.Brightness = 20
-            light.Range = 50
+            light.Range = 30
             light.Color = Color3.fromRGB(255, 255, 0)
             
-            -- Звук грома
-            local sound = Instance.new("Sound", lightning)
-            sound.SoundId = "rbxassetid://821439273"
-            sound.Volume = 2
-            sound:Play()
-            
-            wait(0.05)
-            lightning:Destroy()
-            
-            wait(0.2)
-        end
-    end)
-end)
-
--- Movement Tab
-local MovementTab = CreateTab("Movement", "🚀", function()
-    
-    -- 5. DIMENSION HOP
-    CreateButton("Dimension Hop", "🌌", function()
-        -- Создание портала
-        local portal = Instance.new("Part")
-        portal.Shape = Enum.PartType.Cylinder
-        portal.Size = Vector3.new(1, 10, 10)
-        portal.Material = Enum.Material.Neon
-        portal.Color = Color3.fromRGB(138, 43, 226)
-        portal.Anchored = true
-        portal.CanCollide = false
-        portal.CFrame = HumanoidRootPart.CFrame * CFrame.new(0, 0, -10) * CFrame.Angles(0, 0, math.rad(90))
-        portal.Parent = workspace
-        
-        -- Эффекты портала
-        local particles = Instance.new("ParticleEmitter")
-        particles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-        particles.Parent = portal
-        particles.Rate = 100
-        particles.Lifetime = NumberRange.new(2)
-        particles.Speed = NumberRange.new(10)
-        particles.Color = ColorSequence.new(Color3.fromRGB(138, 43, 226))
-        particles.Rotation = NumberRange.new(0, 360)
-        particles.RotSpeed = NumberRange.new(100)
-        
-        -- Телепорт через 2 секунды
-        wait(2)
-        
-        local mouse = Player:GetMouse()
-        HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 5, 0))
-        
-        -- Портал на выходе
-        local portal2 = portal:Clone()
-        portal2.CFrame = HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
-        portal2.Parent = workspace
-        
-        TweenService:Create(portal, TweenInfo.new(1), {Transparency = 1}):Play()
-        TweenService:Create(portal2, TweenInfo.new(1), {Transparency = 1}):Play()
-        
-        wait(1)
-        portal:Destroy()
-        portal2:Destroy()
-    end)
-    
-    -- 6. SPEEDSTER MODE
-    local speedsterActive = false
-    CreateButton("Speedster Mode", "💨", function()
-        speedsterActive = not speedsterActive
-        
-        if speedsterActive then
-            Humanoid.WalkSpeed = 200
-            
-            -- Эффект следа
-            local trail = Instance.new("Trail")
-            local att0 = Instance.new("Attachment", HumanoidRootPart)
-            local att1 = Instance.new("Attachment", HumanoidRootPart)
-            att1.Position = Vector3.new(0, -2, 0)
-            trail.Attachment0 = att0
-            trail.Attachment1 = att1
-            trail.Color = ColorSequence.new(Color3.fromRGB(255, 255, 0))
-            trail.Lifetime = 1
-            trail.Parent = HumanoidRootPart
-            trail.Name = "SpeedTrail"
-            
-            -- Звуковой эффект
-            local sound = Instance.new("Sound", HumanoidRootPart)
-            sound.SoundId = "rbxassetid://1837829565"
-            sound.Looped = true
-            sound.Volume = 0.5
-            sound:Play()
-            sound.Name = "SpeedSound"
-            
-            StatusLabel.Text = "● SPEEDSTER ACTIVE"
-        else
-            Humanoid.WalkSpeed = 16
-            
-            if HumanoidRootPart:FindFirstChild("SpeedTrail") then
-                HumanoidRootPart.SpeedTrail:Destroy()
-            end
-            if HumanoidRootPart:FindFirstChild("SpeedSound") then
-                HumanoidRootPart.SpeedSound:Destroy()
-            end
-            
-            StatusLabel.Text = "● SPEEDSTER OFF"
-        end
-    end)
-    
-    -- 7. SHADOW CLONE TELEPORT
-    CreateButton("Shadow Clone TP", "👥", function()
-        local mouse = Player:GetMouse()
-        local targetPos = mouse.Hit.Position
-        
-        -- Создание клона на текущем месте
-        local clone = Character:Clone()
-        clone.Parent = workspace
-        clone.Name = "ShadowClone"
-        
-        for _, part in pairs(clone:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Color = Color3.fromRGB(0, 0, 0)
-                part.Material = Enum.Material.Neon
-                part.Transparency = 0.5
-                part.Anchored = true
-            end
-        end
-        
-        -- Дымовой эффект
-        local smoke = Instance.new("Smoke", clone.HumanoidRootPart)
-        smoke.Size = 10
-        smoke.RiseVelocity = 5
-        
-        -- Телепорт
-        HumanoidRootPart.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
-        
-        -- Исчезновение клона
-        TweenService:Create(clone.HumanoidRootPart, TweenInfo.new(2), {Transparency = 1}):Play()
-        
-        wait(2)
-        clone:Destroy()
-    end)
-end)
-
--- Visual Tab
-local VisualTab = CreateTab("Visual", "🎨", function()
-    
-    -- 8. MATRIX RAIN
-    local matrixActive = false
-    CreateButton("Matrix Rain", "💚", function()
-        matrixActive = not matrixActive
-        
-        if matrixActive then
-            for i = 1, 50 do
-                spawn(function()
-                    while matrixActive do
-                        local rain = Instance.new("Part")
-                        rain.Size = Vector3.new(0.5, 2, 0.5)
-                        rain.Material = Enum.Material.Neon
-                        rain.Color = Color3.fromRGB(0, 255, 0)
-                        rain.Anchored = true
-                        rain.CanCollide = false
-                        rain.Position = HumanoidRootPart.Position + Vector3.new(
-                            math.random(-30, 30),
-                            math.random(20, 40),
-                            math.random(-30, 30)
-                        )
-                        rain.Parent = workspace
-                        
-                        local billboard = Instance.new("BillboardGui", rain)
-                        billboard.Size = UDim2.new(0, 50, 0, 50)
-                        billboard.AlwaysOnTop = true
-                        
-                        local label = Instance.new("TextLabel", billboard)
-                        label.Size = UDim2.new(1, 0, 1, 0)
-                        label.BackgroundTransparency = 1
-                        label.Text = string.char(math.random(33, 126))
-                        label.TextColor3 = Color3.fromRGB(0, 255, 0)
-                        label.TextSize = 20
-                        label.Font = Enum.Font.Code
-                        
-                        TweenService:Create(rain, TweenInfo.new(2), {
-                            Position = rain.Position - Vector3.new(0, 50, 0),
-                            Transparency = 1
-                        }):Play()
-                        
-                        wait(2)
-                        rain:Destroy()
-                    end
-                end)
-            end
-        end
-    end)
-    
-    -- 9. HOLOGRAM DECOY
-    CreateButton("Hologram Decoy", "👻", function()
-        local hologram = Character:Clone()
-        hologram.Parent = workspace
-        hologram.Name = "Hologram"
-        
-        for _, part in pairs(hologram:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Color = Color3.fromRGB(0, 200, 255)
-                part.Material = Enum.Material.Neon
-                part.Transparency = 0.5
-            end
-        end
-        
-        -- Голограмма ходит рандомно
-        local holo_humanoid = hologram:FindFirstChildOfClass("Humanoid")
-        if holo_humanoid then
+            -- Damage
             spawn(function()
                 for i = 1, 10 do
-                    wait(1)
-                    local randomPos = HumanoidRootPart.Position + Vector3.new(
-                        math.random(-20, 20),
-                        0,
-                        math.random(-20, 20)
-                    )
-                    holo_humanoid:MoveTo(randomPos)
+                    wait(0.5)
+                    if (target.Position - lightning.Position).Magnitude < 15 then
+                        FireRemote("Damage", selectedPlayer.Character, 50)
+                        
+                        local shock = Instance.new("Explosion")
+                        shock.Position = lightning.Position
+                        shock.BlastRadius = 5
+                        shock.BlastPressure = 100000
+                        shock.Parent = workspace
+                    end
                 end
-                
-                TweenService:Create(hologram.HumanoidRootPart, TweenInfo.new(2), {Transparency = 1}):Play()
-                wait(2)
-                hologram:Destroy()
+                lightning:Destroy()
             end)
         end
     end)
     
-    -- 10. NEON AURA
-    local auraActive = false
-    CreateButton("Neon Aura", "✨", function()
-        auraActive = not auraActive
+    CreateButton("Orbital Strike", "🛰️", function()
+        if not selectedPlayer or not selectedPlayer.Character then return end
         
-        if auraActive then
+        local target = selectedPlayer.Character.HumanoidRootPart.Position
+        
+        -- Лазер с орбиты
+        local beam = Instance.new("Part")
+        beam.Size = Vector3.new(10, 500, 10)
+        beam.Material = Enum.Material.Neon
+        beam.Color = Color3.fromRGB(255, 0, 0)
+        beam.Anchored = true
+        beam.CanCollide = false
+        beam.Transparency = 0.5
+        beam.Position = target + Vector3.new(0, 250, 0)
+        beam.Parent = workspace
+        
+        local light = Instance.new("PointLight", beam)
+        light.Brightness = 50
+        light.Range = 100
+        light.Color = Color3.fromRGB(255, 0, 0)
+        
+        -- Звук
+        local sound = Instance.new("Sound", beam)
+        sound.SoundId = "rbxassetid://2865227271"
+        sound.Volume = 2
+        sound:Play()
+        
+        wait(2)
+        
+        -- Взрыв
+        local explosion = Instance.new("Explosion")
+        explosion.Position = target
+        explosion.BlastRadius = 80
+        explosion.BlastPressure = 10000000
+        explosion.Parent = workspace
+        
+        FireRemote("Damage", selectedPlayer.Character, 999999)
+        
+        TweenService:Create(beam, TweenInfo.new(1), {Transparency = 1}):Play()
+        wait(1)
+        beam:Destroy()
+    end)
+    
+    CreateButton("Void Rift", "🌑", function()
+        if not selectedPlayer or not selectedPlayer.Character then return end
+        
+        local target = selectedPlayer.Character.HumanoidRootPart
+        
+        -- Портал в пустоту
+        local rift = Instance.new("Part")
+        rift.Shape = Enum.PartType.Ball
+        rift.Size = Vector3.new(5, 5, 5)
+        rift.Material = Enum.Material.Neon
+        rift.Color = Color3.fromRGB(0, 0, 0)
+        rift.Anchored = true
+        rift.CanCollide = false
+        rift.Position = target.Position
+        rift.Parent = workspace
+        
+        -- Эффект искажения
+        TweenService:Create(rift, TweenInfo.new(3), {Size = Vector3.new(30, 30, 30)}):Play()
+        
+        spawn(function()
+            for i = 1, 60 do
+                wait(0.1)
+                
+                -- Притягивание игрока
+                if target and target.Parent then
+                    local direction = (rift.Position - target.Position).Unit
+                    local distance = (rift.Position - target.Position).Magnitude
+                    
+                    if distance < 30 then
+                        local bv = Instance.new("BodyVelocity")
+                        bv.Velocity = direction * 100
+                        bv.MaxForce = Vector3.new(4000, 4000, 4000)
+                        bv.Parent = target
+                        game:GetService("Debris"):AddItem(bv, 0.1)
+                        
+                        -- Damage
+                        if distance < 10 then
+                            FireRemote("Damage", selectedPlayer.Character, 100)
+                        end
+                    end
+                end
+                
+                -- Визуальные частицы
+                for j = 1, 5 do
+                    local particle = Instance.new("Part")
+                    particle.Shape = Enum.PartType.Ball
+                    particle.Size = Vector3.new(1, 1, 1)
+                    particle.Material = Enum.Material.Neon
+                    particle.Color = Color3.fromRGB(138, 43, 226)
+                    particle.Anchored = true
+                    particle.CanCollide = false
+                    
+                    local angle = math.random() * math.pi * 2
+                    local radius = math.random(10, 30)
+                    particle.Position = rift.Position + Vector3.new(
+                        math.cos(angle) * radius,
+                        math.random(-15, 15),
+                        math.sin(angle) * radius
+                    )
+                    particle.Parent = workspace
+                    
+                    TweenService:Create(particle, TweenInfo.new(1), {
+                        Position = rift.Position,
+                        Size = Vector3.new(0, 0, 0)
+                    }):Play()
+                    
+                    game:GetService("Debris"):AddItem(particle, 1)
+                end
+            end
+            
+            TweenService:Create(rift, TweenInfo.new(2), {
+                Size = Vector3.new(0, 0, 0),
+                Transparency = 1
+            }):Play()
+            
+            wait(2)
+            rift:Destroy()
+        end)
+    end)
+end)
+
+-- =========================
+-- MOVEMENT TAB
+-- =========================
+
+local MovementTab = CreateTab("Movement", "🚀", function()
+    
+    CreateButton("Telekinesis Flight", "🧠", function()
+        local flying = false
+        local flySpeed = 100
+        local bodyVelocity
+        local bodyGyro
+        
+        if not flying then
+            flying = true
+            
+            bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+            bodyVelocity.Parent = HumanoidRootPart
+            
+            bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+            bodyGyro.P = 1000
+            bodyGyro.Parent = HumanoidRootPart
+            
+            -- Aura эффект
             for _, part in pairs(Character:GetChildren()) do
                 if part:IsA("BasePart") then
                     local aura = Instance.new("ParticleEmitter")
@@ -1149,320 +1317,709 @@ local VisualTab = CreateTab("Visual", "🎨", function()
                     aura.Texture = "rbxasset://textures/particles/sparkles_main.dds"
                     aura.Rate = 50
                     aura.Lifetime = NumberRange.new(1)
-                    aura.Speed = NumberRange.new(2)
+                    aura.Speed = NumberRange.new(5)
                     aura.Color = ColorSequence.new(Color3.fromRGB(138, 43, 226))
-                    aura.Name = "NeonAura"
-                    
-                    spawn(function()
-                        while auraActive do
-                            aura.Color = ColorSequence.new(Color3.fromHSV(tick() % 5 / 5, 1, 1))
-                            wait(0.1)
-                        end
-                    end)
+                    aura.Name = "FlyAura"
                 end
             end
+            
+            spawn(function()
+                while flying and bodyVelocity and bodyVelocity.Parent do
+                    local camera = workspace.CurrentCamera
+                    bodyGyro.CFrame = camera.CFrame
+                    
+                    local velocity = Vector3.new(0, 0, 0)
+                    
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                        velocity = velocity + (camera.CFrame.LookVector * flySpeed)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                        velocity = velocity - (camera.CFrame.LookVector * flySpeed)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                        velocity = velocity - (camera.CFrame.RightVector * flySpeed)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                        velocity = velocity + (camera.CFrame.RightVector * flySpeed)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                        velocity = velocity + Vector3.new(0, flySpeed, 0)
+                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                        velocity = velocity - Vector3.new(0, flySpeed, 0)
+                    end
+                    
+                    bodyVelocity.Velocity = velocity
+                    
+                    RunService.RenderStepped:Wait()
+                end
+            end)
+            
+            StatusLabel.Text = "● FLYING ACTIVE"
         else
+            flying = false
+            if bodyVelocity then bodyVelocity:Destroy() end
+            if bodyGyro then bodyGyro:Destroy() end
+            
             for _, part in pairs(Character:GetDescendants()) do
-                if part:IsA("ParticleEmitter") and part.Name == "NeonAura" then
+                if part:IsA("ParticleEmitter") and part.Name == "FlyAura" then
                     part:Destroy()
                 end
             end
+            
+            StatusLabel.Text = "● FLYING OFF"
         end
     end)
-end)
-
--- Misc Tab
-local MiscTab = CreateTab("Misc", "🎯", function()
     
-    -- 11. TIME STOP
-    local timeStopActive = false
-    CreateButton("Time Stop", "⏰", function()
-        timeStopActive = not timeStopActive
+    CreateButton("Blink Teleport", "✨", function()
+        local mouse = Player:GetMouse()
         
-        if timeStopActive then
-            -- Визуальный эффект
-            local colorCorrection = Instance.new("ColorCorrectionEffect", game.Lighting)
-            colorCorrection.Saturation = -1
-            colorCorrection.Name = "TimeStop"
+        -- Эффект исчезновения
+        for _, part in pairs(Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                TweenService:Create(part, TweenInfo.new(0.3), {Transparency = 1}):Play()
+            end
+        end
+        
+        local flash1 = Instance.new("Part")
+        flash1.Shape = Enum.PartType.Ball
+        flash1.Size = Vector3.new(10, 10, 10)
+        flash1.Material = Enum.Material.Neon
+        flash1.Color = Color3.fromRGB(255, 255, 255)
+        flash1.Anchored = true
+        flash1.CanCollide = false
+        flash1.Position = HumanoidRootPart.Position
+        flash1.Parent = workspace
+        
+        wait(0.3)
+        
+        -- Телепорт
+        HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
+        
+        -- Эффект появления
+        local flash2 = Instance.new("Part")
+        flash2.Shape = Enum.PartType.Ball
+        flash2.Size = Vector3.new(10, 10, 10)
+        flash2.Material = Enum.Material.Neon
+        flash2.Color = Color3.fromRGB(138, 43, 226)
+        flash2.Anchored = true
+        flash2.CanCollide = false
+        flash2.Position = HumanoidRootPart.Position
+        flash2.Parent = workspace
+        
+        for _, part in pairs(Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                TweenService:Create(part, TweenInfo.new(0.3), {Transparency = 0}):Play()
+            end
+        end
+        
+        TweenService:Create(flash1, TweenInfo.new(0.5), {Size = Vector3.new(0, 0, 0), Transparency = 1}):Play()
+        TweenService:Create(flash2, TweenInfo.new(0.5), {Size = Vector3.new(0, 0, 0), Transparency = 1}):Play()
+        
+        wait(0.5)
+        flash1:Destroy()
+        flash2:Destroy()
+    end)
+    
+    CreateButton("Parkour Mode", "🏃", function()
+        Humanoid.WalkSpeed = 100
+        Humanoid.JumpPower = 150
+        
+        -- Эффекты бега
+        local trail = Instance.new("Trail")
+        local att0 = Instance.new("Attachment", HumanoidRootPart)
+        local att1 = Instance.new("Attachment", HumanoidRootPart)
+        att1.Position = Vector3.new(0, -2, 0)
+        trail.Attachment0 = att0
+        trail.Attachment1 = att1
+        trail.Color = ColorSequence.new(Color3.fromRGB(138, 43, 226))
+        trail.Lifetime = 2
+        trail.Parent = HumanoidRootPart
+        trail.Name = "ParkourTrail"
+        
+        StatusLabel.Text = "● PARKOUR MODE ON"
+    end)
+    
+    CreateButton("Wall Run", "🧗", function()
+        local wallRunning = false
+        
+        Humanoid.StateChanged:Connect(function(old, new)
+            if new == Enum.HumanoidStateType.Freefall then
+                local ray = Ray.new(HumanoidRootPart.Position, HumanoidRootPart.CFrame.RightVector * 3)
+                local hit = workspace:FindPartOnRay(ray, Character)
+                
+                if hit and not wallRunning then
+                    wallRunning = true
+                    
+                    local bv = Instance.new("BodyVelocity")
+                    bv.Velocity = Vector3.new(0, 50, 0) + (HumanoidRootPart.CFrame.LookVector * 30)
+                    bv.MaxForce = Vector3.new(4000, 4000, 4000)
+                    bv.Parent = HumanoidRootPart
+                    
+                    wait(1)
+                    bv:Destroy()
+                    wallRunning = false
+                end
+            end
+        end)
+        
+        StatusLabel.Text = "● WALL RUN ENABLED"
+    end)
+    
+    CreateButton("Dash Attack", "💨", function()
+        local dashDirection = HumanoidRootPart.CFrame.LookVector
+        
+        -- Trail effect
+        for i = 1, 10 do
+            local clone = Character:Clone()
+            clone.Parent = workspace
+            clone.Name = "DashClone"
             
-            -- Заморозка всех
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= Player and player.Character then
-                    for _, part in pairs(player.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.Anchored = true
-                        end
-                    end
+            for _, part in pairs(clone:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Anchored = true
+                    part.CanCollide = false
+                    part.Transparency = 0.7
+                    part.Color = Color3.fromRGB(138, 43, 226)
                 end
             end
             
-            StatusLabel.Text = "● TIME STOPPED"
-        else
-            if game.Lighting:FindFirstChild("TimeStop") then
-                game.Lighting.TimeStop:Destroy()
+            TweenService:Create(clone.HumanoidRootPart, TweenInfo.new(0.5), {Transparency = 1}):Play()
+            game:GetService("Debris"):AddItem(clone, 0.5)
+        end
+        
+        -- Dash
+        local bv = Instance.new("BodyVelocity")
+        bv.Velocity = dashDirection * 200
+        bv.MaxForce = Vector3.new(4000, 0, 4000)
+        bv.Parent = HumanoidRootPart
+        
+        -- Damage врагов на пути
+        local hitbox = Instance.new("Part")
+        hitbox.Size = Vector3.new(5, 5, 10)
+        hitbox.Transparency = 1
+        hitbox.CanCollide = false
+        hitbox.Parent = workspace
+        
+        local weld = Instance.new("WeldConstraint")
+        weld.Part0 = HumanoidRootPart
+        weld.Part1 = hitbox
+        weld.Parent = hitbox
+        
+        hitbox.Touched:Connect(function(hit)
+            local targetPlayer = game.Players:GetPlayerFromCharacter(hit.Parent)
+            if targetPlayer and targetPlayer ~= Player then
+                FireRemote("Damage", hit.Parent, 200)
+                
+                local impact = Instance.new("Explosion")
+                impact.Position = hit.Position
+                impact.BlastRadius = 10
+                impact.BlastPressure = 500000
+                impact.Parent = workspace
+            end
+        end)
+        
+        wait(0.3)
+        bv:Destroy()
+        hitbox:Destroy()
+    end)
+end)
+
+-- =========================
+-- VISUAL TAB
+-- =========================
+
+local VisualTab = CreateTab("Visual", "🎨", function()
+    
+    CreateButton("Anime Transformation", "⚡", function()
+        -- Эффект трансформации как в аниме
+        local oldCameraSubject = workspace.CurrentCamera.CameraSubject
+        workspace.CurrentCamera.CameraSubject = HumanoidRootPart
+        
+        -- Земля трескается
+        for i = 1, 20 do
+            local crack = Instance.new("Part")
+            crack.Size = Vector3.new(math.random(5, 15), 0.5, math.random(2, 5))
+            crack.Material = Enum.Material.Concrete
+            crack.Color = Color3.fromRGB(80, 80, 80)
+            crack.Anchored = true
+            crack.Position = HumanoidRootPart.Position + Vector3.new(
+                math.random(-20, 20),
+                -3,
+                math.random(-20, 20)
+            )
+            crack.Rotation = Vector3.new(0, math.random(0, 360), 0)
+            crack.Parent = workspace
+            
+            game:GetService("Debris"):AddItem(crack, 5)
+        end
+        
+        -- Аура силы
+        local aura = Instance.new("Part")
+        aura.Shape = Enum.PartType.Ball
+        aura.Size = Vector3.new(1, 1, 1)
+        aura.Material = Enum.Material.Neon
+        aura.Color = Color3.fromRGB(255, 255, 0)
+        aura.Transparency = 0.5
+        aura.Anchored = true
+        aura.CanCollide = false
+        aura.CFrame = HumanoidRootPart.CFrame
+        aura.Parent = workspace
+        
+        -- Молнии вокруг
+        spawn(function()
+            for i = 1, 30 do
+                local lightning = Instance.new("Part")
+                lightning.Size = Vector3.new(0.5, math.random(10, 30), 0.5)
+                lightning.Material = Enum.Material.Neon
+                lightning.Color = Color3.fromRGB(255, 255, 0)
+                lightning.Anchored = true
+                lightning.CanCollide = false
+                
+                local angle = math.random() * math.pi * 2
+                local radius = math.random(5, 15)
+                lightning.Position = HumanoidRootPart.Position + Vector3.new(
+                    math.cos(angle) * radius,
+                    math.random(0, 20),
+                    math.sin(angle) * radius
+                )
+                lightning.Parent = workspace
+                
+                game:GetService("Debris"):AddItem(lightning, 0.1)
+                
+                wait(0.05)
+            end
+        end)
+        
+        -- Расширение ауры
+        for i = 1, 50 do
+            aura.Size = aura.Size + Vector3.new(1, 1, 1)
+            aura.CFrame = HumanoidRootPart.CFrame
+            wait(0.05)
+        end
+        
+        -- Взрыв силы
+        local blast = Instance.new("Explosion")
+        blast.Position = HumanoidRootPart.Position
+        blast.BlastRadius = 50
+        blast.BlastPressure = 0
+        blast.Parent = workspace
+        
+        -- Постоянная аура
+        for _, part in pairs(Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                local permanentAura = Instance.new("ParticleEmitter")
+                permanentAura.Parent = part
+                permanentAura.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+                permanentAura.Rate = 100
+                permanentAura.Lifetime = NumberRange.new(1)
+                permanentAura.Speed = NumberRange.new(10)
+                permanentAura.Color = ColorSequence.new(Color3.fromRGB(255, 255, 0))
+                permanentAura.Name = "TransformAura"
+                
+                part.Material = Enum.Material.Neon
+            end
+        end
+        
+        TweenService:Create(aura, TweenInfo.new(2), {
+            Size = Vector3.new(0, 0, 0),
+            Transparency = 1
+        }):Play()
+        
+        wait(2)
+        aura:Destroy()
+        workspace.CurrentCamera.CameraSubject = oldCameraSubject
+    end)
+    
+    CreateButton("Holographic Clone Army", "👥", function()
+        for i = 1, 10 do
+            local clone = Character:Clone()
+            clone.Parent = workspace
+            clone.Name = "HoloClone" .. i
+            
+            for _, part in pairs(clone:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Color = Color3.fromRGB(0, 200, 255)
+                    part.Material = Enum.Material.Neon
+                    part.Transparency = 0.3
+                end
+            end
+            
+            local offset = CFrame.Angles(0, math.rad(36 * i), 0) * CFrame.new(0, 0, 15)
+            clone.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * offset
+            
+            -- Синхронные движения
+            local holo_humanoid = clone:FindFirstChildOfClass("Humanoid")
+            if holo_humanoid then
+                spawn(function()
+                    for j = 1, 20 do
+                        wait(0.5)
+                        if HumanoidRootPart then
+                            local newOffset = CFrame.Angles(0, math.rad(36 * i), 0) * CFrame.new(0, 0, 15)
+                            clone.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * newOffset
+                        end
+                    end
+                    
+                    TweenService:Create(clone.HumanoidRootPart, TweenInfo.new(2), {Transparency = 1}):Play()
+                    wait(2)
+                    clone:Destroy()
+                end)
+            end
+        end
+    end)
+    
+    CreateButton("Cyberpunk Vision", "🤖", function()
+        -- Неоновое видение
+        local colorCorrection = Instance.new("ColorCorrectionEffect", game.Lighting)
+        colorCorrection.Saturation = 0.5
+        colorCorrection.Contrast = 0.3
+        colorCorrection.Name = "CyberVision"
+        
+        local bloom = Instance.new("BloomEffect", game.Lighting)
+        bloom.Intensity = 1
+        bloom.Size = 24
+        bloom.Threshold = 0.5
+        bloom.Name = "CyberBloom"
+        
+        -- Неоновые контуры объектов
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and math.random(1, 3) == 1 then
+                local highlight = Instance.new("SelectionBox")
+                highlight.Parent = obj
+                highlight.Adornee = obj
+                highlight.LineThickness = 0.05
+                highlight.Color3 = Color3.fromHSV(math.random(), 1, 1)
+                highlight.Name = "CyberHighlight"
+            end
+        end
+        
+        StatusLabel.Text = "● CYBERPUNK VISION ON"
+    end)
+    
+    CreateButton("Glitch Effect", "📺", function()
+        spawn(function()
+            for i = 1, 50 do
+                -- Рандомная телепортация персонажа (визуально)
+                local glitchClone = Character:Clone()
+                glitchClone.Parent = workspace
+                glitchClone.Name = "GlitchClone"
+                
+                for _, part in pairs(glitchClone:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.Anchored = true
+                        part.CanCollide = false
+                        part.Material = Enum.Material.Neon
+                        part.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+                        part.Transparency = 0.7
+                    end
+                end
+                
+                glitchClone.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.new(
+                    math.random(-5, 5),
+                    math.random(-2, 2),
+                    math.random(-5, 5)
+                )
+                
+                game:GetService("Debris"):AddItem(glitchClone, 0.1)
+                
+                -- Искажение экрана
+                local distortion = Instance.new("BlurEffect", game.Lighting)
+                distortion.Size = math.random(5, 20)
+                distortion.Name = "Glitch"
+                
+                wait(0.05)
+                distortion:Destroy()
+            end
+        end)
+    end)
+    
+    CreateButton("Frozen Time Sphere", "❄️", function()
+        local sphere = Instance.new("Part")
+        sphere.Shape = Enum.PartType.Ball
+        sphere.Size = Vector3.new(1, 1, 1)
+        sphere.Material = Enum.Material.Ice
+        sphere.Color = Color3.fromRGB(100, 200, 255)
+        sphere.Transparency = 0.7
+        sphere.Anchored = true
+        sphere.CanCollide = false
+        sphere.Position = HumanoidRootPart.Position
+        sphere.Parent = workspace
+        
+        TweenService:Create(sphere, TweenInfo.new(2), {Size = Vector3.new(100, 100, 100)}):Play()
+        
+        -- Заморозка внутри сферы
+        spawn(function()
+            for i = 1, 100 do
+                wait(0.1)
+                
+                for _, player in pairs(game.Players:GetPlayers()) do
+                    if player ~= Player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local distance = (player.Character.HumanoidRootPart.Position - sphere.Position).Magnitude
+                        
+                        if distance < 50 then
+                            -- Визуальная заморозка
+                            for _, part in pairs(player.Character:GetChildren()) do
+                                if part:IsA("BasePart") then
+                                    part.Anchored = true
+                                    part.Color = Color3.fromRGB(100, 200, 255)
+                                    part.Material = Enum.Material.Ice
+                                    
+                                    if not part:FindFirstChild("FrozenEffect") then
+                                        local ice = Instance.new("ParticleEmitter")
+                                        ice.Parent = part
+                                        ice.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+                                        ice.Color = ColorSequence.new(Color3.fromRGB(100, 200, 255))
+                                        ice.Rate = 50
+                                        ice.Lifetime = NumberRange.new(1)
+                                        ice.Name = "FrozenEffect"
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
             end
             
             -- Разморозка
             for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= Player and player.Character then
+                if player.Character then
                     for _, part in pairs(player.Character:GetDescendants()) do
                         if part:IsA("BasePart") then
                             part.Anchored = false
                         end
-                    end
-                end
-            end
-            
-            StatusLabel.Text = "● TIME RESUMED"
-        end
-    end)
-    
-    -- 12. BLACK HOLE
-    CreateButton("Create Black Hole", "🕳️", function()
-        local mouse = Player:GetMouse()
-        local blackHole = Instance.new("Part")
-        blackHole.Shape = Enum.PartType.Ball
-        blackHole.Size = Vector3.new(10, 10, 10)
-        blackHole.Material = Enum.Material.Neon
-        blackHole.Color = Color3.fromRGB(0, 0, 0)
-        blackHole.Position = mouse.Hit.Position
-        blackHole.Anchored = true
-        blackHole.CanCollide = false
-        blackHole.Parent = workspace
-        
-        -- Gravitational effect
-        spawn(function()
-            for i = 1, 100 do
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("BasePart") and not obj.Anchored and (obj.Position - blackHole.Position).Magnitude < 100 then
-                        local direction = (blackHole.Position - obj.Position).Unit
-                        local distance = (blackHole.Position - obj.Position).Magnitude
-                        local strength = math.clamp(1000 / distance, 0, 100)
-                        
-                        local bv = Instance.new("BodyVelocity")
-                        bv.Velocity = direction * strength
-                        bv.MaxForce = Vector3.new(4000, 4000, 4000)
-                        bv.Parent = obj
-                        game:GetService("Debris"):AddItem(bv, 0.1)
-                        
-                        if distance < 10 then
-                            obj:Destroy()
+                        if part:IsA("ParticleEmitter") and part.Name == "FrozenEffect" then
+                            part:Destroy()
                         end
                     end
                 end
-                
-                TweenService:Create(blackHole, TweenInfo.new(0.1), {
-                    Size = blackHole.Size + Vector3.new(0.2, 0.2, 0.2)
-                }):Play()
-                
-                wait(0.1)
             end
             
-            -- Исчезновение черной дыры
-            TweenService:Create(blackHole, TweenInfo.new(2), {
+            TweenService:Create(sphere, TweenInfo.new(2), {
                 Size = Vector3.new(0, 0, 0),
                 Transparency = 1
             }):Play()
             
             wait(2)
-            blackHole:Destroy()
+            sphere:Destroy()
         end)
     end)
+end)
+
+-- =========================
+-- MISC TAB
+-- =========================
+
+local MiscTab = CreateTab("Misc", "🎯", function()
     
-    -- 13. CLONE SWAP
-    CreateButton("Clone Swap", "🔄", function()
-        -- Создание клона
-        local clone = Character:Clone()
-        clone.Parent = workspace
-        clone.Name = "SwapClone"
-        clone.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame
+    CreateButton("Anti-Gravity Zone", "🌌", function()
+        local zone = Instance.new("Part")
+        zone.Shape = Enum.PartType.Ball
+        zone.Size = Vector3.new(50, 50, 50)
+        zone.Material = Enum.Material.ForceField
+        zone.Color = Color3.fromRGB(138, 43, 226)
+        zone.Transparency = 0.8
+        zone.Anchored = true
+        zone.CanCollide = false
+        zone.Position = HumanoidRootPart.Position
+        zone.Parent = workspace
         
-        -- Сохранение позиции
-        local oldPos = HumanoidRootPart.CFrame
-        
-        -- Телепорт в рандомное место
-        local randomPos = HumanoidRootPart.Position + Vector3.new(
-            math.random(-50, 50),
-            5,
-            math.random(-50, 50)
-        )
-        HumanoidRootPart.CFrame = CFrame.new(randomPos)
-        
-        -- Через 3 секунды меняемся местами
-        wait(3)
-        
-        local clonePos = clone.HumanoidRootPart.CFrame
-        clone.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame
-        HumanoidRootPart.CFrame = clonePos
-        
-        -- Эффект смены
-        local flash = Instance.new("Part")
-        flash.Shape = Enum.PartType.Ball
-        flash.Size = Vector3.new(20, 20, 20)
-        flash.Material = Enum.Material.Neon
-        flash.Color = Color3.fromRGB(255, 255, 255)
-        flash.Transparency = 0.5
-        flash.Anchored = true
-        flash.CanCollide = false
-        flash.Position = HumanoidRootPart.Position
-        flash.Parent = workspace
-        
-        TweenService:Create(flash, TweenInfo.new(0.5), {
-            Size = Vector3.new(0, 0, 0),
-            Transparency = 1
-        }):Play()
-        
-        wait(0.5)
-        flash:Destroy()
-        clone:Destroy()
-    end)
-    
-    -- 14. DRAGON SUMMON
-    CreateButton("Summon Dragon", "🐉", function()
-        local dragon = Instance.new("Part")
-        dragon.Size = Vector3.new(10, 5, 20)
-        dragon.Material = Enum.Material.Neon
-        dragon.Color = Color3.fromRGB(255, 0, 0)
-        dragon.Position = HumanoidRootPart.Position + Vector3.new(0, 20, 0)
-        dragon.Parent = workspace
-        
-        -- Создание головы дракона
-        local head = Instance.new("Part")
-        head.Shape = Enum.PartType.Ball
-        head.Size = Vector3.new(8, 8, 8)
-        head.Material = Enum.Material.Neon
-        head.Color = Color3.fromRGB(255, 0, 0)
-        head.Parent = dragon
-        
-        local weld = Instance.new("WeldConstraint")
-        weld.Part0 = dragon
-        weld.Part1 = head
-        weld.Parent = dragon
-        
-        -- Огонь из пасти
-        local fire = Instance.new("Fire", head)
-        fire.Size = 15
-        fire.Heat = 25
-        
-        -- Дракон летает по кругу
         spawn(function()
-            local angle = 0
             for i = 1, 100 do
-                angle = angle + 0.1
-                local x = math.cos(angle) * 30
-                local z = math.sin(angle) * 30
-                dragon.CFrame = CFrame.new(
-                    HumanoidRootPart.Position + Vector3.new(x, 20, z),
-                    HumanoidRootPart.Position
-                )
-                
-                -- Огненные шары
-                if i % 10 == 0 then
-                    local fireball = Instance.new("Part")
-                    fireball.Shape = Enum.PartType.Ball
-                    fireball.Size = Vector3.new(5, 5, 5)
-                    fireball.Material = Enum.Material.Neon
-                    fireball.Color = Color3.fromRGB(255, 100, 0)
-                    fireball.Position = head.Position
-                    fireball.Parent = workspace
-                    
-                    local fireEffect = Instance.new("Fire", fireball)
-                    
-                    local bv = Instance.new("BodyVelocity", fireball)
-                    bv.Velocity = (HumanoidRootPart.Position - fireball.Position).Unit * 50
-                    bv.MaxForce = Vector3.new(4000, 4000, 4000)
-                    
-                    fireball.Touched:Connect(function(hit)
-                        local explosion = Instance.new("Explosion")
-                        explosion.Position = fireball.Position
-                        explosion.BlastRadius = 15
-                        explosion.Parent = workspace
-                        fireball:Destroy()
-                    end)
-                    
-                    game:GetService("Debris"):AddItem(fireball, 5)
-                end
-                
                 wait(0.1)
+                
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and not obj.Anchored and (obj.Position - zone.Position).Magnitude < 25 then
+                        local bv = Instance.new("BodyVelocity")
+                        bv.Velocity = Vector3.new(0, 20, 0) + Vector3.new(math.random(-5, 5), 0, math.random(-5, 5))
+                        bv.MaxForce = Vector3.new(4000, 4000, 4000)
+                        bv.Parent = obj
+                        game:GetService("Debris"):AddItem(bv, 0.1)
+                    end
+                end
             end
             
-            dragon:Destroy()
+            TweenService:Create(zone, TweenInfo.new(2), {Transparency = 1}):Play()
+            wait(2)
+            zone:Destroy()
         end)
     end)
     
-    -- 15. REALITY MARBLE
-    CreateButton("Reality Marble", "🌍", function()
-        -- Создание купола
-        local marble = Instance.new("Part")
-        marble.Shape = Enum.PartType.Ball
-        marble.Size = Vector3.new(100, 100, 100)
-        marble.Material = Enum.Material.ForceField
-        marble.Color = Color3.fromRGB(138, 43, 226)
-        marble.Transparency = 0.7
-        marble.Anchored = true
-        marble.CanCollide = false
-        marble.Position = HumanoidRootPart.Position
-        marble.Parent = workspace
+    CreateButton("Infinite Jump", "🦘", function()
+        UserInputService.JumpRequest:Connect(function()
+            if Humanoid then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end)
         
-        -- Изменение неба
-        game.Lighting.TimeOfDay = "00:00:00"
-        game.Lighting.Ambient = Color3.fromRGB(138, 43, 226)
+        StatusLabel.Text = "● INFINITE JUMP ON"
+    end)
+    
+    CreateButton("No Clip", "👻", function()
+        local noclipping = false
         
-        -- Звездное небо внутри
-        for i = 1, 100 do
-            local star = Instance.new("Part")
-            star.Shape = Enum.PartType.Ball
-            star.Size = Vector3.new(1, 1, 1)
-            star.Material = Enum.Material.Neon
-            star.Color = Color3.fromRGB(255, 255, 255)
-            star.Anchored = true
-            star.CanCollide = false
-            
-            local angle1 = math.random() * math.pi * 2
-            local angle2 = math.random() * math.pi * 2
-            local radius = 45
-            
-            star.Position = marble.Position + Vector3.new(
-                math.cos(angle1) * math.cos(angle2) * radius,
-                math.sin(angle2) * radius,
-                math.sin(angle1) * math.cos(angle2) * radius
-            )
-            star.Parent = marble
+        if not noclipping then
+            noclipping = true
             
             spawn(function()
-                while star.Parent do
-                    star.Size = Vector3.new(
-                        math.random(1, 3),
-                        math.random(1, 3),
-                        math.random(1, 3)
-                    )
-                    wait(math.random(1, 3) / 10)
+                while noclipping do
+                    for _, part in pairs(Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                    RunService.Stepped:Wait()
                 end
             end)
+            
+            StatusLabel.Text = "● NOCLIP ON"
+        else
+            noclipping = false
+            
+            for _, part in pairs(Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+            
+            StatusLabel.Text = "● NOCLIP OFF"
+        end
+    end)
+    
+    CreateButton("Time Manipulation", "⏱️", function()
+        -- Замедление времени (визуально)
+        game.Lighting.ClockTime = 0
+        
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= Player and player.Character then
+                local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = humanoid.WalkSpeed * 0.2
+                    
+                    for _, animator in pairs(humanoid:GetPlayingAnimationTracks()) do
+                        animator:AdjustSpeed(0.2)
+                    end
+                end
+            end
         end
         
-        -- Через 15 секунд исчезает
-        wait(15)
+        -- Эффект замедления
+        local blur = Instance.new("BlurEffect", game.Lighting)
+        blur.Size = 10
+        blur.Name = "TimeBlur"
         
-        TweenService:Create(marble, TweenInfo.new(2), {
-            Size = Vector3.new(0, 0, 0),
-            Transparency = 1
-        }):Play()
+        local colorCorrection = Instance.new("ColorCorrectionEffect", game.Lighting)
+        colorCorrection.Saturation = -0.5
+        colorCorrection.Name = "TimeColor"
         
-        game.Lighting.TimeOfDay = "14:00:00"
-        game.Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+        StatusLabel.Text = "● TIME SLOWED"
         
-        wait(2)
-        marble:Destroy()
+        wait(10)
+        
+        -- Возврат времени
+        game.Lighting.ClockTime = 14
+        
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= Player and player.Character then
+                local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = humanoid.WalkSpeed * 5
+                end
+            end
+        end
+        
+        if blur then blur:Destroy() end
+        if colorCorrection then colorCorrection:Destroy() end
+        
+        StatusLabel.Text = "● TIME NORMAL"
+    end)
+    
+    CreateButton("Minigun Turret", "🔫", function()
+        local turret = Instance.new("Part")
+        turret.Size = Vector3.new(3, 3, 3)
+        turret.Material = Enum.Material.Metal
+        turret.Color = Color3.fromRGB(50, 50, 50)
+        turret.Anchored = true
+        turret.Position = HumanoidRootPart.Position + (HumanoidRootPart.CFrame.LookVector * 5)
+        turret.Parent = workspace
+        
+        local barrel = Instance.new("Part")
+        barrel.Size = Vector3.new(0.5, 0.5, 3)
+        barrel.Material = Enum.Material.Metal
+        barrel.Color = Color3.fromRGB(30, 30, 30)
+        barrel.Parent = turret
+        
+        local weld = Instance.new("WeldConstraint")
+        weld.Part0 = turret
+        weld.Part1 = barrel
+        weld.Parent = barrel
+        
+        -- Автоматическая стрельба
+        spawn(function()
+            for i = 1, 100 do
+                wait(0.1)
+                
+                -- Поиск ближайшего врага
+                local nearestPlayer = nil
+                local nearestDistance = 100
+                
+                for _, player in pairs(game.Players:GetPlayers()) do
+                    if player ~= Player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local distance = (player.Character.HumanoidRootPart.Position - turret.Position).Magnitude
+                        if distance < nearestDistance then
+                            nearestPlayer = player
+                            nearestDistance = distance
+                        end
+                    end
+                end
+                
+                if nearestPlayer and nearestPlayer.Character then
+                    local target = nearestPlayer.Character.HumanoidRootPart
+                    
+                    -- Поворот турели
+                    turret.CFrame = CFrame.new(turret.Position, target.Position)
+                    
+                    -- Выстрел
+                    local bullet = Instance.new("Part")
+                    bullet.Size = Vector3.new(0.3, 0.3, 2)
+                    bullet.Material = Enum.Material.Neon
+                    bullet.Color = Color3.fromRGB(255, 255, 0)
+                    bullet.CanCollide = false
+                    bullet.CFrame = barrel.CFrame * CFrame.new(0, 0, -2)
+                    bullet.Parent = workspace
+                    
+                    local bv = Instance.new("BodyVelocity")
+                    bv.Velocity = (target.Position - bullet.Position).Unit * 200
+                    bv.MaxForce = Vector3.new(4000, 4000, 4000)
+                    bv.Parent = bullet
+                    
+                    bullet.Touched:Connect(function(hit)
+                        if hit.Parent == nearestPlayer.Character then
+                            FireRemote("Damage", nearestPlayer.Character, 20)
+                            bullet:Destroy()
+                        end
+                    end)
+                    
+                    game:GetService("Debris"):AddItem(bullet, 2)
+                    
+                    -- Звук выстрела
+                    local sound = Instance.new("Sound", barrel)
+                    sound.SoundId = "rbxassetid://2697295" 
+                    sound.Volume = 0.5
+                    sound:Play()
+                    game:GetService("Debris"):AddItem(sound, 1)
+                end
+            end
+            
+            turret:Destroy()
+        end)
     end)
 end)
 
 -- Player List Toggle
-CreateButton("👥 TOGGLE PLAYER LIST", "👥", function()
+CreateButton("👥 TOGGLE TARGET SELECT", "👥", function()
     PlayerSelector.Visible = not PlayerSelector.Visible
     
     if PlayerSelector.Visible then
-        -- Анимация появления
         PlayerSelector.Size = UDim2.new(0, 0, 0, 0)
         TweenService:Create(PlayerSelector, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
             Size = UDim2.new(0, 250, 0, 400)
@@ -1471,9 +2028,9 @@ CreateButton("👥 TOGGLE PLAYER LIST", "👥", function()
 end)
 
 -- Активация первого таба
-CombatTab.MouseButton1Click:Fire()
+ServerSideTab.MouseButton1Click:Fire()
 
--- Drag система для главного окна
+-- Drag система
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -1486,7 +2043,7 @@ end)
 -- Анимация появления
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 TweenService:Create(MainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back), {
-    Size = UDim2.new(0, 600, 0, 500)
+    Size = UDim2.new(0, 700, 0, 600)
 }):Play()
 
 -- Звук запуска
@@ -1496,6 +2053,14 @@ startSound.Volume = 0.5
 startSound.Parent = ScreenGui
 startSound:Play()
 
-print("⚡ NEXUS HUB LOADED!")
-print("🎯 15 ЗОЛОТЫХ ФУНКЦИЙ АКТИВИРОВАНЫ!")
-print("📡 DISCORD WEBHOOK ГОТОВ!")
+print("⚡═══════════════════════════════⚡")
+print("   NEXUS HUB ULTIMATE LOADED!")
+print("⚡═══════════════════════════════⚡")
+print("📡 Discord Webhook: READY")
+print("🔥 ServerSide Scanner: ACTIVE")
+print("🎯 RemoteEvents Found: " .. #RemoteEvents)
+print("⚔️ Combat Functions: LOADED")
+print("🚀 Movement Functions: LOADED")
+print("🎨 Visual Functions: LOADED")
+print("🎯 Misc Functions: LOADED")
+print("⚡═══════════════════════════════⚡")
